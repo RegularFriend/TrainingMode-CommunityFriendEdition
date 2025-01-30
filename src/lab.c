@@ -2072,6 +2072,18 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
         // if im in downwait, perform getup logic
         if ((cpu_data->state_id == ASID_DOWNWAITD) || (cpu_data->state_id == ASID_DOWNWAITU))
         {
+            // check to wait in miss tech
+            if (eventData->cpu_miss_tech_wait_timer) {
+                eventData->cpu_miss_tech_wait_timer--;
+                break;
+            } else {
+                int wait_chance = LabOptions_Tech[OPTTECH_GETUPWAITCHANCE].option_val;
+                if (HSD_Randi(100) < wait_chance) {
+                    eventData->cpu_miss_tech_wait_timer = 15;
+                    break;
+                }
+            }
+
             // perform getup behavior
             int getup = LabOptions_Tech[OPTTECH_GETUP].option_val;
             s8 dir;
@@ -2287,6 +2299,7 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
             eventData->cpu_hitshieldnum = 0;
             eventData->cpu_isactionable = 0;
             eventData->cpu_sdinum = 0;
+            eventData->cpu_miss_tech_wait_timer = 0;
             goto CPULOGIC_START;
         }
 

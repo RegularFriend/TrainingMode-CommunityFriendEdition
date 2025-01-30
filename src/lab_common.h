@@ -192,6 +192,9 @@ typedef struct LabData
     // Delay timer for "Counter After Frames" Option
     u8 cpu_countertimer;
 
+    // Delay timer for "Miss Tech Wait Chance" Option
+    u8 cpu_miss_tech_wait_timer;
+
     // Aitch: We set this flag if the CPU performs a counter action on this frame.
     // Occasionally we need to determine if the CPU is countering (such as AUTORESTORE_COUNTER).
     // However, if the counter action immediately completes, the cpu state is never set to CPUSTATE_COUNTER.

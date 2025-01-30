@@ -1746,16 +1746,18 @@ static int tech_frame_distinguishable[27] = {
 enum tech_option
 {
     OPTTECH_TECH,
+    OPTTECH_GETUP,
     OPTTECH_INVISIBLE,
     OPTTECH_INVISIBLE_DELAY,
     OPTTECH_SOUND,
     OPTTECH_TRAP,
     OPTTECH_LOCKOUT,
+
     OPTTECH_TECHINPLACECHANCE,
     OPTTECH_TECHAWAYCHANCE,
     OPTTECH_TECHTOWARDCHANCE,
     OPTTECH_MISSTECHCHANCE,
-    OPTTECH_GETUP,
+    OPTTECH_GETUPWAITCHANCE,
     OPTTECH_GETUPSTANDCHANCE,
     OPTTECH_GETUPAWAYCHANCE,
     OPTTECH_GETUPTOWARDCHANCE,
@@ -1772,6 +1774,14 @@ static EventOption LabOptions_Tech[OPTTECH_COUNT] = {
         .desc = "Adjust what the CPU will do upon colliding\nwith the stage.",
         .option_values = LabValues_Tech,
         .onOptionChange = Lab_ChangeTech,
+    },
+    {
+        .option_kind = OPTKIND_STRING,
+        .value_num = sizeof(LabValues_Getup) / 4,
+        .option_name = "Get Up Option",
+        .desc = "Adjust what the CPU will do after missing\na tech input.",
+        .option_values = LabValues_Getup,
+        .onOptionChange = Lab_ChangeGetup,
     },
     {
         .option_kind = OPTKIND_STRING,
@@ -1845,12 +1855,12 @@ static EventOption LabOptions_Tech[OPTTECH_COUNT] = {
         .onOptionChange = Lab_ChangeMissTechChance,
     },
     {
-        .option_kind = OPTKIND_STRING,
-        .value_num = sizeof(LabValues_Getup) / 4,
-        .option_name = "Get Up Option",
-        .desc = "Adjust what the CPU will do after missing\na tech input.",
-        .option_values = LabValues_Getup,
-        .onOptionChange = Lab_ChangeGetup,
+        .option_kind = OPTKIND_INT,
+        .value_num = 101,
+        .option_val = 0,
+        .option_name = "Miss Tech Wait Chance",
+        .desc = "Adjust the chance the CPU will wait 15 frames\nafter a missed tech.",
+        .option_values = "%d%%",
     },
     {
         .option_kind = OPTKIND_INT,
