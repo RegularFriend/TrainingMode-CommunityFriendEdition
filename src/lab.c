@@ -6266,20 +6266,31 @@ void Event_Think(GOBJ *event)
     }
 
     // update shield deterioration
+    int inf_shield = 0;
     switch (LabOptions_CPU[OPTCPU_SHIELD].option_val)
     {
         case CPUINFSHIELD_OFF:
             break;
         case CPUINFSHIELD_UNTIL_HIT:
-            if (eventData->cpu_hitshield == 0) {
-                hmn_data->shield.health = 60;
-                cpu_data->shield.health = 60;
-            }
+            inf_shield = eventData->cpu_hitshield == 0;
             break;
         case CPUINFSHIELD_ON:
-            cpu_data->shield.health = 60;
-            hmn_data->shield.health = 60;
+            inf_shield = 1;
             break;
+    }
+
+    if (inf_shield)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            for (int ch = 0; ch < 2; ++ch)
+            {
+                GOBJ *fighter = Fighter_GetSubcharGObj(i, ch);
+                if (fighter == 0) continue;
+                FighterData *data = fighter->userdata;
+                data->shield.health = 60;
+            }
+        }
     }
 
     if (LabOptions_CPU[OPTCPU_SET_POS].onOptionSelect == Lab_FinishMoveCPU) {
