@@ -14,6 +14,7 @@ static EventMenu LabMenu_Record;
 static EventMenu LabMenu_Tech;
 static EventMenu LabMenu_Stage_FOD;
 static EventMenu LabMenu_CustomOSDs;
+static ShortcutList Lab_ShortcutList;
 
 #define AUTORESTORE_DELAY 20
 #define INTANG_COLANIM 10
@@ -807,6 +808,7 @@ static EventMenu LabMenu_Main = {
     .name = "Main Menu",
     .option_num = sizeof(LabOptions_Main) / sizeof(EventOption),
     .options = &LabOptions_Main,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // GENERAL MENU --------------------------------------------------------------
@@ -1005,6 +1007,7 @@ static EventMenu LabMenu_General = {
     .name = "General",
     .option_num = sizeof(LabOptions_General) / sizeof(EventOption),
     .options = &LabOptions_General,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // INFO DISPLAY MENU --------------------------------------------------------------
@@ -1182,12 +1185,14 @@ static EventMenu LabMenu_InfoDisplayHMN = {
     .name = "HMN Info Display",
     .option_num = sizeof(LabOptions_InfoDisplayHMN) / sizeof(EventOption),
     .options = &LabOptions_InfoDisplayHMN,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 static EventMenu LabMenu_InfoDisplayCPU = {
     .name = "CPU Info Display",
     .option_num = sizeof(LabOptions_InfoDisplayCPU) / sizeof(EventOption),
     .options = &LabOptions_InfoDisplayCPU,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // STAGE MENUS -----------------------------------------------------------
@@ -1220,6 +1225,7 @@ static EventMenu LabMenu_Stage_Stadium = {
     .name = "Stage Options",
     .option_num = sizeof(LabOptions_Stage_Stadium) / sizeof(EventOption),
     .options = &LabOptions_Stage_Stadium,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // STAGE MENU FOD --------------------------------------------------------
@@ -1255,6 +1261,7 @@ static EventMenu LabMenu_Stage_FOD = {
     .name = "Stage Options",
     .option_num = sizeof(LabOptions_Stage_FOD) / sizeof(EventOption),
     .options = &LabOptions_Stage_FOD,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // STAGE MENU TABLE --------------------------------------------------------
@@ -1327,6 +1334,7 @@ static EventMenu LabMenu_CustomOSDs = {
     .name = "Custom OSDs",
     .option_num = OPTCUSTOMOSD_MAX_COUNT,
     .options = &LabOptions_CustomOSDs,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // CPU MENU --------------------------------------------------------------
@@ -1695,6 +1703,7 @@ static EventMenu LabMenu_CPU = {
     .name = "CPU Options",
     .option_num = sizeof(LabOptions_CPU) / sizeof(EventOption),
     .options = &LabOptions_CPU,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // TECH MENU --------------------------------------------------------------
@@ -1904,6 +1913,7 @@ static EventMenu LabMenu_Tech = {
     .name = "Tech Options",
     .option_num = sizeof(LabOptions_Tech) / sizeof(EventOption),
     .options = &LabOptions_Tech,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // PLAYBACK CHANCES MENU -----------------------------------------------------
@@ -2038,12 +2048,14 @@ static EventMenu LabMenu_SlotChancesHMN = {
     .name = "HMN Playback Slot Chances",
     .option_num = sizeof(LabOptions_SlotChancesHMN) / sizeof(EventOption),
     .options = &LabOptions_SlotChancesHMN,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 static EventMenu LabMenu_SlotChancesCPU = {
     .name = "HMN Playback Slot Chances",
     .option_num = sizeof(LabOptions_SlotChancesCPU) / sizeof(EventOption),
     .options = &LabOptions_SlotChancesCPU,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // RECORDING MENU --------------------------------------------------------------
@@ -2246,6 +2258,7 @@ static EventMenu LabMenu_Record = {
     .name = "Recording",
     .option_num = sizeof(LabOptions_Record) / sizeof(EventOption),
     .options = &LabOptions_Record,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 // OVERLAY MENU --------------------------------------------------------------
@@ -2440,10 +2453,26 @@ static EventMenu LabMenu_OverlaysHMN = {
     .name = "HMN Overlays",
     .option_num = sizeof(LabOptions_OverlaysHMN) / sizeof(EventOption),
     .options = &LabOptions_OverlaysHMN,
+    .shortcuts = &Lab_ShortcutList,
 };
 
 static EventMenu LabMenu_OverlaysCPU = {
     .name = "CPU Overlays",
     .option_num = sizeof(LabOptions_OverlaysCPU) / sizeof(EventOption),
     .options = &LabOptions_OverlaysCPU,
+    .shortcuts = &Lab_ShortcutList,
+};
+
+// SHORTCUTS #########################################################
+
+static Shortcut Lab_Shortcuts[] = {
+    {
+        .buttons_mask = HSD_BUTTON_A,
+        .option = &LabOptions_General[OPTGEN_FRAME],
+    }
+};
+
+static ShortcutList Lab_ShortcutList = {
+    .count = ARRAY_LEN(Lab_Shortcuts),
+    .list = Lab_Shortcuts,
 };

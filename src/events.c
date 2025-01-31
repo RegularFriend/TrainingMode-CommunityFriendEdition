@@ -3063,7 +3063,7 @@ void EventMenu_Update(GOBJ *gobj)
     }
 
     // if this menu has an upate function, run its function
-    else if ((menuData->isPaused == 1) && (currMenu->menu_think != 0))
+    else if ((menuData->mode == MenuMode_Paused) && (currMenu->menu_think != 0))
     {
         update_menu = currMenu->menu_think(gobj);
     }
@@ -3071,7 +3071,7 @@ void EventMenu_Update(GOBJ *gobj)
     if (update_menu == 1)
     {
         // Check if being pressed
-        int isPress = 0;
+        int pause_pressed = 0;
         for (int i = 0; i < 6; i++)
         {
 
@@ -3089,33 +3089,36 @@ void EventMenu_Update(GOBJ *gobj)
                 {
                     if ((pad->held & HSD_BUTTON_X) && (pad->down & HSD_BUTTON_DPAD_UP))
                     {
-                        isPress = 1;
+                        pause_pressed = 1;
                         menuData->controller_index = controller_index;
                         break;
                     }
                 }
-                else
+                else if ((pad->down & HSD_BUTTON_START) != 0)
                 {
-                    if ((pad->down & HSD_BUTTON_START) != 0)
-                    {
-                        isPress = 1;
-                        menuData->controller_index = controller_index;
-                        break;
-                    }
+                    pause_pressed = 1;
+                    menuData->controller_index = controller_index;
+                    break;
+                }
+                else if ((pad->down & HSD_BUTTON_Y) != 0)
+                {
+                    menuData->controller_index = controller_index;
+                    menuData->mode = MenuMode_Shortcut;
+                    break;
                 }
             }
         }
 
         // change pause state
-        if (isPress != 0)
+        if (pause_pressed != 0)
         {
 
             // pause game
-            if (menuData->isPaused == 0)
+            if (menuData->mode == MenuMode_Normal)
             {
 
                 // set state
-                menuData->isPaused = 1;
+                menuData->mode = MenuMode_Paused;
 
                 // Create menu
                 EventMenu_CreateModel(gobj, currMenu);
@@ -3139,7 +3142,7 @@ void EventMenu_Update(GOBJ *gobj)
             else
             {
 
-                menuData->isPaused = 0;
+                menuData->mode = MenuMode_Normal;
 
                 // destroy menu
                 EventMenu_DestroyMenu(gobj);
@@ -3152,7 +3155,7 @@ void EventMenu_Update(GOBJ *gobj)
         }
 
         // run menu logic if the menu is shown
-        else if ((menuData->isPaused == 1) && (stc_event_vars.hide_menu == 0))
+        else if (menuData->mode == MenuMode_Paused && stc_event_vars.hide_menu == 0)
         {
             // Get the current menu
             EventMenu *currMenu = menuData->currMenu;
@@ -3167,6 +3170,10 @@ void EventMenu_Update(GOBJ *gobj)
             // popup think
             else if (currMenu->state == EMSTATE_OPENPOP)
                 EventMenu_PopupThink(gobj, currMenu);
+        }
+        else if (menuData->mode == MenuMode_Shortcut)
+        {
+            stc_event_vars.hide_menu = 1;
         }
     }
 
