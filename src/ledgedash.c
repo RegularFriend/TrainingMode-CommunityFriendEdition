@@ -28,6 +28,7 @@ enum menu_options
     OPT_CAM,
     OPT_INV,
     OPT_SPEED,
+    OPT_OVERLAYS,
     OPT_ABOUT,
     OPT_EXIT,
 };
@@ -47,6 +48,7 @@ static char **LdshOptions_Start[] = {"Ledge", "Falling", "Stage", "Respawn Platf
 static char **LdshOptions_HUD[] = {"On", "Off"};
 static char **LdshOptions_Inv[] = {"Off", "On"};
 static float LdshOptions_GameSpeeds[] = {1.0, 2.0/3.0, 1.0/2.0, 1.0/4.0};
+static char **LdshOptions_Overlays[] = {"Off", "On"};
 static char *LdshOptions_GameSpeedText[] = {"1", "2/3", "1/2", "1/4"};
 static char *LdshOptions_Reset[] = {"None", "Same Side", "Swap", "Swap on Success", "Random"};
 
@@ -104,6 +106,13 @@ static EventOption LdshOptions_Main[] = {
         .option_name = "Game Speed",
         .desc = "Change how fast the game engine runs.",
         .option_values = LdshOptions_GameSpeedText,
+    },
+    {
+        .option_kind = OPTKIND_STRING,
+        .value_num = sizeof(LdshOptions_Overlays) / sizeof(*LdshOptions_Overlays),
+        .option_name = "Color Overlays",
+        .desc = "Show which state you are in with a color overlay.",
+        .option_values = LdshOptions_Overlays,
     },
     {
         .option_kind = OPTKIND_FUNC,
@@ -190,6 +199,33 @@ void Event_Think(GOBJ *event)
     Ledgedash_ResetThink(event_data, hmn);
     Ledgedash_HUDThink(event_data, hmn_data);
     Ledgedash_HitLogThink(event_data, hmn);
+
+    if (LdshOptions_Main[OPT_OVERLAYS].option_val == 1) {
+        memset(&hmn_data->color[1], 0, sizeof(ColorOverlay));
+        memset(&hmn_data->color[0], 0, sizeof(ColorOverlay));
+
+        int curr_frame = event_data->action_state.timer - 1;
+        if (curr_frame < 30) {
+            int action = event_data->action_state.action_log[curr_frame];
+
+            GXColor color;
+            if (action == LDACT_NONE) {
+                if (hmn_data->hurt.intang_frames.ledge != 0) {
+                    color = tmgbar_blue;
+                    color.a = 180;
+                } else {
+                    color = (GXColor) {0, 0, 0, 0};
+                }
+            } else {
+                color = *tmgbar_colors[action];
+                color.a = 180;
+            }
+
+            hmn_data->color[1].hex = color;
+            hmn_data->color[1].color_enable = 1;
+        }
+    }
+
 
     return;
 }
