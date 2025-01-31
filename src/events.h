@@ -569,7 +569,15 @@ typedef struct MsgMngrData
 } MsgMngrData;
 static GOBJ *stc_msgmgr;
 static float stc_msg_queue_offsets[] = {5.15, 5.15, 5.15, 5.15, 5.15, 5.15, -5.15}; // Y offsets for each message in the queue
-static Vec3 stc_msg_queue_general_pos = {-21, 18.5, 0};
+static Vec3 stc_msg_queue_pos[] = {
+    {-22, -13, 0},
+    {-7, -13, 0},
+    {7, -13, 0},
+    {22, -13, 0},
+    {0, 0, 0},
+    {0, 0, 0},
+    {-21, 18.5, 0}
+};
 enum MsgColors
 {
     MSGCOLOR_WHITE,

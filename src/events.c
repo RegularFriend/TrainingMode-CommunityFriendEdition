@@ -2599,21 +2599,9 @@ void Message_Manager(GOBJ *mngr_gobj)
                 JOBJ *this_msg_jobj = this_msg_gobj->hsd_object;
 
                 // Get the onscreen position for this queue
-                Vec3 base_pos;
-                Vec3 this_msg_pos;
                 float pos_delta = stc_msg_queue_offsets[i];
-                if (i < 6)
-                {
-                    Vec3 *hud_pos = Match_GetPlayerHUDPos(i);
-
-                    base_pos.X = hud_pos->X;
-                    base_pos.Y = hud_pos->Y + MSG_HUDYOFFSET;
-                    base_pos.Z = hud_pos->Z;
-                }
-                else if (i == MSGQUEUE_GENERAL)
-                {
-                    base_pos = stc_msg_queue_general_pos;
-                }
+                Vec3 base_pos = stc_msg_queue_pos[i];
+                Vec3 this_msg_pos;
                 this_msg_pos.X = base_pos.X; // Get this messages position
 
                 switch (this_msg_data->state)
