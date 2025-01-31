@@ -3068,6 +3068,9 @@ void EventMenu_Update(GOBJ *gobj)
         update_menu = currMenu->menu_think(gobj);
     }
 
+    int exit_menu = 0;
+    int enter_menu = 0;
+
     if (update_menu == 1)
     {
         // Check if being pressed
@@ -3100,68 +3103,29 @@ void EventMenu_Update(GOBJ *gobj)
                     menuData->controller_index = controller_index;
                     break;
                 }
-                else if ((pad->down & HSD_BUTTON_Y) != 0)
-                {
-                    menuData->controller_index = controller_index;
-                    menuData->mode = MenuMode_Shortcut;
-                    break;
-                }
             }
         }
+
+        HSD_Pad *pad = PadGet(menuData->controller_index, PADGET_MASTER);
 
         // change pause state
         if (pause_pressed != 0)
         {
-
-            // pause game
-            if (menuData->mode == MenuMode_Normal)
-            {
-
-                // set state
-                menuData->mode = MenuMode_Paused;
-
-                // Create menu
-                EventMenu_CreateModel(gobj, currMenu);
-                EventMenu_CreateText(gobj, currMenu);
-                EventMenu_UpdateText(gobj, currMenu);
-                if (currMenu->state == EMSTATE_OPENPOP)
-                {
-                    EventOption *currOption = &currMenu->options[currMenu->cursor];
-                    EventMenu_CreatePopupModel(gobj, currMenu);
-                    EventMenu_CreatePopupText(gobj, currMenu);
-                    EventMenu_UpdatePopupText(gobj, currOption);
-                }
-
-                // Freeze the game
-                Match_FreezeGame(1);
-                SFX_PlayCommon(5);
-                Match_HideHUD();
-                Match_AdjustSoundOnPause(1);
-            }
-            // unpause game
-            else
-            {
-
-                menuData->mode = MenuMode_Normal;
-
-                // destroy menu
-                EventMenu_DestroyMenu(gobj);
-
-                // Unfreeze the game
-                Match_UnfreezeGame(1);
-                Match_ShowHUD();
-                Match_AdjustSoundOnPause(0);
-            }
+            enter_menu = menuData->mode == MenuMode_Normal;
+            exit_menu = menuData->mode != MenuMode_Normal;
         }
 
         // run menu logic if the menu is shown
-        else if (menuData->mode == MenuMode_Paused && stc_event_vars.hide_menu == 0)
+        if (menuData->mode == MenuMode_Paused && stc_event_vars.hide_menu == 0)
         {
             // Get the current menu
             EventMenu *currMenu = menuData->currMenu;
 
+            if ((pad->down & HSD_BUTTON_Y) != 0 && menuData->currMenu->shortcuts != 0)
+                menuData->mode = MenuMode_Shortcut;
+
             // menu think
-            if (currMenu->state == EMSTATE_FOCUS)
+            else if (currMenu->state == EMSTATE_FOCUS)
             {
                 // check to run custom menu think function
                 EventMenu_MenuThink(gobj, currMenu);
@@ -3171,10 +3135,80 @@ void EventMenu_Update(GOBJ *gobj)
             else if (currMenu->state == EMSTATE_OPENPOP)
                 EventMenu_PopupThink(gobj, currMenu);
         }
-        else if (menuData->mode == MenuMode_Shortcut)
+
+        if (menuData->mode == MenuMode_Shortcut)
         {
-            stc_event_vars.hide_menu = 1;
+            MENUMODE_SHORTCUT:
+
+            ShortcutList *shortcuts = menuData->currMenu->shortcuts;
+            if (shortcuts != 0)
+            {
+                stc_event_vars.hide_menu = 1;
+                int held_shortcut_buttons = pad->held & SHORTCUT_BUTTONS;
+
+                for (int i = 0; i < shortcuts->count; ++i)
+                {
+                    Shortcut *shortcut = &shortcuts->list[i];
+
+                    if (held_shortcut_buttons == shortcut->buttons_mask)
+                    {
+                        if (shortcut->option != 0) {
+                            EventOption *option = shortcut->option;
+                            option->option_val = (option->option_val + 1) % option->value_num;
+                            if (option->onOptionChange)
+                                option->onOptionChange(stc_event_vars.menu_gobj, option->option_val);
+                            SFX_PlayCommon(2);
+                        }
+
+                        menuData->mode = MenuMode_ShortcutWaitForRelease;
+                        break;
+                    }
+                }
+            }
         }
+
+        if (menuData->mode == MenuMode_ShortcutWaitForRelease)
+        {
+            if (pad->held == 0)
+                exit_menu = 1;
+        }
+    }
+
+    if (enter_menu != 0)
+    {
+        // set state
+        menuData->mode = MenuMode_Paused;
+
+        // Create menu
+        EventMenu_CreateModel(gobj, currMenu);
+        EventMenu_CreateText(gobj, currMenu);
+        EventMenu_UpdateText(gobj, currMenu);
+        if (currMenu->state == EMSTATE_OPENPOP)
+        {
+            EventOption *currOption = &currMenu->options[currMenu->cursor];
+            EventMenu_CreatePopupModel(gobj, currMenu);
+            EventMenu_CreatePopupText(gobj, currMenu);
+            EventMenu_UpdatePopupText(gobj, currOption);
+        }
+
+        // Freeze the game
+        Match_FreezeGame(1);
+        SFX_PlayCommon(5);
+        Match_HideHUD();
+        Match_AdjustSoundOnPause(1);
+    }
+
+    if (exit_menu != 0)
+    {
+        menuData->mode = MenuMode_Normal;
+
+        // destroy menu
+        EventMenu_DestroyMenu(gobj);
+
+        // Unfreeze the game
+        Match_UnfreezeGame(1);
+        Match_ShowHUD();
+        Match_AdjustSoundOnPause(0);
     }
 
     return;

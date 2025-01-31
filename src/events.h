@@ -29,6 +29,8 @@
 #define OSReport TMLOG
 #endif
 
+#define SHORTCUT_BUTTONS (HSD_BUTTON_A | HSD_BUTTON_B | HSD_BUTTON_X | HSD_TRIGGER_Z)
+
 // Custom File Structs
 typedef struct evMenu
 {
@@ -131,6 +133,7 @@ typedef enum MenuMode {
     MenuMode_Normal,
     MenuMode_Paused,
     MenuMode_Shortcut,
+    MenuMode_ShortcutWaitForRelease,
 } MenuMode;
 typedef struct MenuData
 {
