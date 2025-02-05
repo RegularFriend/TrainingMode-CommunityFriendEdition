@@ -956,6 +956,12 @@ float Fighter_GetOpponentDir(FighterData *from, FighterData *to)
     return dir;
 }
 
+static int is_hitlag_victim(GOBJ *character) {
+    FighterData *data = character->userdata;
+    int state = data->state_id;
+    return data->flags.hitlag && (in_hitstun_anim(state) || state == ASID_GUARDSETOFF);
+}
+
 static int in_hitstun_anim(int state) {
     return ASID_DAMAGEHI1 <= state && state <= ASID_DAMAGEFLYROLL;
 }
@@ -6063,13 +6069,13 @@ void Event_Think_LabState_Normal(GOBJ *event) {
             stc_playback_cancelled_cpu |= Record_PastLastInput(1);
             break;
         case PLAYBACKCOUNTER_ON_HIT_CPU:
-            stc_playback_cancelled_cpu |= cpu_data->flags.hitlag_victim;
+            stc_playback_cancelled_cpu |= is_hitlag_victim(cpu);
             break;
         case PLAYBACKCOUNTER_ON_HIT_HMN:
-            stc_playback_cancelled_cpu |= hmn_data->flags.hitlag_victim;
+            stc_playback_cancelled_cpu |= is_hitlag_victim(hmn);
             break;
         case PLAYBACKCOUNTER_ON_HIT_EITHER:
-            stc_playback_cancelled_cpu |= cpu_data->flags.hitlag_victim || hmn_data->flags.hitlag_victim;
+            stc_playback_cancelled_cpu |= is_hitlag_victim(cpu) || is_hitlag_victim(hmn);
             break;
         }
 

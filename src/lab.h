@@ -84,6 +84,8 @@ static int is_tech_anim(int state);
 static bool can_walljump(GOBJ* fighter);
 static int GetCurrentStateName(GOBJ *fighter, char *buf);
 static bool check_has_jump(GOBJ *g);
+static int in_hitstun_anim(int state);
+static int is_hitlag_victim(GOBJ *character);
 void CustomTDI_Update(GOBJ *gobj);
 void CustomTDI_Destroy(GOBJ *gobj);
 void CustomTDI_Apply(GOBJ *cpu, GOBJ *hmn, CustomTDI *di);
