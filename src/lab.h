@@ -32,9 +32,9 @@ typedef struct CPUAction {
     s8 cstickX;                 // c stick X value
     s8 cstickY;                 // c stick Y value
     int input;                  // button to input
-    unsigned char isLast : 1;   // flag to indicate this was the final input
-    unsigned char stickDir : 3; // 0 = none, 1 = towards opponent, 2 = away from opponent, 3 = forward, 4 = backward
-    unsigned char recSlot  : 3; // 0 = none, 1 = slot 1, ..., 6 = slot 6
+    unsigned char isLast        : 1; // flag to indicate this was the final input
+    unsigned char stickDir      : 3; // 0 = none, 1 = towards opponent, 2 = away from opponent, 3 = forward, 4 = backward
+    unsigned char recSlot       : 3; // 0 = none, 1 = slot 1, ..., 6 = slot 6
     bool (*custom_check)(GOBJ *);
 } CPUAction;
 
@@ -624,12 +624,12 @@ static CPUAction Lab_CPUActionWavedashDown[] = {
     -1,
 };
 
-static CPUAction Lab_CPUActionSlot1[] = { { .recSlot = 1, }, -1, };
-static CPUAction Lab_CPUActionSlot2[] = { { .recSlot = 2, }, -1, };
-static CPUAction Lab_CPUActionSlot3[] = { { .recSlot = 3, }, -1, };
-static CPUAction Lab_CPUActionSlot4[] = { { .recSlot = 4, }, -1, };
-static CPUAction Lab_CPUActionSlot5[] = { { .recSlot = 5, }, -1, };
-static CPUAction Lab_CPUActionSlot6[] = { { .recSlot = 6, }, -1, };
+static CPUAction Lab_CPUActionSlot1[] = { { .recSlot = 1 }, -1, };
+static CPUAction Lab_CPUActionSlot2[] = { { .recSlot = 2 }, -1, };
+static CPUAction Lab_CPUActionSlot3[] = { { .recSlot = 3 }, -1, };
+static CPUAction Lab_CPUActionSlot4[] = { { .recSlot = 4 }, -1, };
+static CPUAction Lab_CPUActionSlot5[] = { { .recSlot = 5 }, -1, };
+static CPUAction Lab_CPUActionSlot6[] = { { .recSlot = 6 }, -1, };
 
 static CPUAction *Lab_CPUActions[] = {
     0,

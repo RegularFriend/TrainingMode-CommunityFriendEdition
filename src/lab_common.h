@@ -200,7 +200,10 @@ typedef struct LabData
     // However, if the counter action immediately completes, the cpu state is never set to CPUSTATE_COUNTER.
     // And sometimes the CPU is in the CPUSTATE_COUNTER state but does not act.
     // This flag is only set if the CPU has counter acted this frame.
-    u8 cpu_countering;
+    u8 cpu_countering: 1;
+
+    // Aitch: This flag is set per action and prevents air-ground transitions from interrupting the counter action.
+    u8 cpu_countering_no_interrupt: 1;
 
     // Aitch: This counter needs to be manually set. We can't use the baked in ssbm timer, because
     // It'll mess with internal ssbm stuff probably. If the timer is not zero, then no tech.stuff

@@ -1238,6 +1238,11 @@ int CPU_IsGrabbed(GOBJ *cpu, GOBJ *hmn)
 
 int Lab_CPUPerformAction(GOBJ *cpu, int action_id, GOBJ *hmn)
 {
+    LabData *eventData = event_vars->event_gobj->userdata;
+
+    // pre-set flag in case of early return.
+    eventData->cpu_countering_no_interrupt = false;
+
     FighterData *cpu_data = cpu->userdata;
     FighterData *hmn_data = hmn->userdata;
 
@@ -1245,9 +1250,14 @@ int Lab_CPUPerformAction(GOBJ *cpu, int action_id, GOBJ *hmn)
     int action_done = 0;
     CPUAction *action_list = Lab_CPUActions[action_id];
 
+    // clear inputs
+    Fighter_ZeroCPUInputs(cpu_data);
+    if (action_list == 0) return true;
+
     int recSlot = action_list[0].recSlot;
     if (recSlot != 0) {
-        LabData *eventData = event_vars->event_gobj->userdata;
+        eventData->cpu_countering_no_interrupt = true;
+
         int frame = eventData->counter_slot_frame;
         if (frame == 0 && !CPUAction_CheckASID(cpu, ASID_ACTIONABLE)) return false; // wait until actionable
         RecInputData *data = rec_data.cpu_inputs[recSlot-1];
@@ -1275,11 +1285,6 @@ int Lab_CPUPerformAction(GOBJ *cpu, int action_id, GOBJ *hmn)
     s16 cpu_frame = cpu_data->state.frame;
     if (cpu_frame == -1)
         cpu_frame = 0;
-
-    // clear inputs
-    Fighter_ZeroCPUInputs(cpu_data);
-
-    if (action_list == 0) return 1;
 
     // perform command
     // loop through all inputs
@@ -1381,12 +1386,13 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
     // noact
     cpu_data->cpu.ai = 15;
 
+    // Check for grab release
     int last_state = cpu_data->TM.state_prev[0];
-    bool is_cpu_no_longer_in_captur_cut = last_state == ASID_CAPTURECUT && cpu_state != ASID_CAPTURECUT;
-    bool is_cpu_no_longer_in_captur_jump = last_state == ASID_CAPTUREJUMP && cpu_state != ASID_CAPTUREJUMP;
-
-    if((is_cpu_no_longer_in_captur_cut || is_cpu_no_longer_in_captur_jump) && cpu_data->TM.state_frame == 1)
+    bool exited_capture_cut = last_state == ASID_CAPTURECUT && cpu_state != ASID_CAPTURECUT;
+    bool exited_capture_jump = last_state == ASID_CAPTUREJUMP && cpu_state != ASID_CAPTUREJUMP;
+    if((exited_capture_cut || exited_capture_jump) && cpu_data->TM.state_frame == 1)
     {
+        eventData->cpu_hitnum++;
         eventData->cpu_state = CPUSTATE_COUNTER;
         goto CPULOGIC_COUNTER;
     }
@@ -2189,30 +2195,38 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
             eventData->cpu_groundstate = cpu_data->phys.air_state; // remember initial ground state
         }
 
-        // if started in the air, didnt finish action, but now grounded, perform ground action
-        if ((eventData->cpu_groundstate == 1) && (cpu_data->phys.air_state == 0))
-            eventData->cpu_groundstate = 0;
-
-        // if started on the ground, didnt finish action, but now airborne, perform air action
-        if ((eventData->cpu_groundstate == 0) && (cpu_data->phys.air_state == 1))
-            eventData->cpu_groundstate = 1;
-
-        // ensure hit count and frame count criteria are met
-        int action_id;
-        if (eventData->cpu_hitkind == HITKIND_DAMAGE)
+        if (eventData->cpu_countering_no_interrupt == 0)
         {
-            if ((eventData->cpu_hitnum < LabOptions_CPU[OPTCPU_CTRHITS].option_val) || (eventData->cpu_countertimer < LabOptions_CPU[OPTCPU_CTRFRAMES].option_val))
-            {
+            // if started in the air, didnt finish action, but now grounded, perform ground action
+            if (eventData->cpu_groundstate == 1 && cpu_data->phys.air_state == 0)
+                eventData->cpu_groundstate = 0;
+
+            // if started on the ground, didnt finish action, but now airborne, perform air action
+            if (eventData->cpu_groundstate == 0 && cpu_data->phys.air_state == 1)
+                eventData->cpu_groundstate = 1;
+        }
+
+        int action_id;
+        if (
+            eventData->cpu_hitkind == HITKIND_DAMAGE
+
+            // Additional check for countering on grab release
+            || last_state == ASID_CAPTURECUT || last_state == ASID_CAPTUREJUMP
+        ) {
+            // ensure hit count and frame count criteria are met
+            int min_hitnum = LabOptions_CPU[OPTCPU_CTRHITS].option_val;
+            int counter_delay = LabOptions_CPU[OPTCPU_CTRFRAMES].option_val;
+
+            if (eventData->cpu_hitnum < min_hitnum || eventData->cpu_countertimer < counter_delay) {
                 break;
             }
 
-            // get counter action
-            if (cpu_data->phys.air_state == 0 || (eventData->cpu_groundstate == 0)) // if am grounded or started grounded
+            if (eventData->cpu_groundstate == 0)
             {
                 int grndCtr = LabOptions_CPU[OPTCPU_CTRGRND].option_val;
                 action_id = CPUCounterActionsGround[grndCtr];
             }
-            else if (cpu_data->phys.air_state == 1) // only if in the air at the time of hitstun ending
+            else
             {
                 int airCtr = LabOptions_CPU[OPTCPU_CTRAIR].option_val;
                 action_id = CPUCounterActionsAir[airCtr];
@@ -2240,28 +2254,6 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
             int shieldCtr = LabOptions_CPU[OPTCPU_CTRSHIELD].option_val;
             action_id = CPUCounterActionsShield[shieldCtr];
         }
-
-        // Additional check for the grab release counter action
-        else if (last_state == ASID_CAPTURECUT || last_state == ASID_CAPTUREJUMP)
-        {
-
-            if (eventData->cpu_countertimer < LabOptions_CPU[OPTCPU_CTRFRAMES].option_val)
-            {
-                break;
-            }
-            
-            if (cpu_data->phys.air_state == 0 || eventData->cpu_groundstate == 0) // if am grounded or started grounded
-            {
-                int grndCtr = LabOptions_CPU[OPTCPU_CTRGRND].option_val;
-                action_id = CPUCounterActionsGround[grndCtr];
-            }
-
-            else if (cpu_data->phys.air_state == 1) // only if in the air when the cpu_countertimer is up
-            {
-                int airCtr = LabOptions_CPU[OPTCPU_CTRAIR].option_val;
-                action_id = CPUCounterActionsAir[airCtr];
-            }
-        }
         else
         {
             // wasnt hit, fell or something idk. enter start again
@@ -2271,9 +2263,7 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
         if (action_id == 0) {
             eventData->cpu_state = CPUSTATE_NONE;
             goto CPULOGIC_NONE;
-        }
-        else 
-        {
+        } else {
             eventData->cpu_countering = true;
             if (Lab_CPUPerformAction(cpu, action_id, hmn))
                 eventData->cpu_state = CPUSTATE_RECOVER;
