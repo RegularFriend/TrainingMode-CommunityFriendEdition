@@ -554,7 +554,6 @@ void Ledgedash_ResetThink(LedgedashData *event_data, GOBJ *hmn)
         bool dead = hmn_data->flags.dead;
         bool missed_airdodge = hmn_data->state_id == ASID_ESCAPEAIR && hmn_data->TM.state_frame >= 9;
         bool ledge_action = ASID_CLIFFCLIMBSLOW <= state && state <= ASID_CLIFFJUMPQUICK2;
-        bool aerial = ASID_ATTACKAIRN <= state && state <= ASID_ATTACKAIRLW && hmn_data->TM.state_frame >= 12;
         bool non_landing_grounded = hmn_data->phys.air_state == 0
             && event_data->action_state.is_release
             && state != ASID_LANDING
@@ -562,7 +561,7 @@ void Ledgedash_ResetThink(LedgedashData *event_data, GOBJ *hmn)
             && state != ASID_REBIRTHWAIT
             && hmn_data->TM.state_frame >= 12;
 
-        if (dead || missed_airdodge || ledge_action || aerial || non_landing_grounded) {
+        if (dead || missed_airdodge || ledge_action || non_landing_grounded) {
             event_data->reset_timer = 20;
             event_data->was_successful = false;
             SFX_PlayCommon(3);
