@@ -568,16 +568,45 @@ typedef struct MsgMngrData
     GOBJ *msg_queue[MSGQUEUE_NUM][MSGQUEUE_SIZE]; // array 7 is for miscellaneous messages, not related to a player
 } MsgMngrData;
 static GOBJ *stc_msgmgr;
-static float stc_msg_queue_offsets[] = {5.15, 5.15, 5.15, 5.15, 5.15, 5.15, -5.15}; // Y offsets for each message in the queue
-static Vec3 stc_msg_queue_pos[] = {
-    {-22, -13, 0},
-    {-7, -13, 0},
-    {7, -13, 0},
-    {22, -13, 0},
-    {0, 0, 0},
-    {0, 0, 0},
-    {-21, 18.5, 0}
+
+static Vec2 stc_msg_queue_offsets_vertical[] = {
+    {0, 5.15f},
+    {0, 5.15f},
+    {0, 5.15f},
+    {0, 5.15f},
+    {0, 5.15f},
+    {0, 5.15f},
+    {0, -5.15f}
 };
+static Vec3 stc_msg_queue_pos_sides[] = {
+    {-22.f, -13.f, 0},
+    {-7.f, -13.f, 0},
+    {7.f, -13.f, 0},
+    {22.f, -13.f, 0},
+    {0, 0, 0},
+    {0, 0, 0},
+    {0, -5.15f}
+};
+
+static Vec2 stc_msg_queue_offsets_horizontal[] = {
+    {12.5f, 0},
+    {12.5f, 0},
+    {12.5f, 0},
+    {12.5f, 0},
+    {12.5f, 0},
+    {12.5f, 0},
+    {-12.5f, 0},
+};
+static Vec3 stc_msg_queue_pos_top[] = {
+    {-22.f, 20.f, 0},
+    {-22.f, 14.f, 0},
+    {-22.f, 8.f, 0},
+    {-22.f, 2.f, 0},
+    {0, 0, 0},
+    {0, 0, 0},
+    {22.f, 20.f, 0}
+};
+
 enum MsgColors
 {
     MSGCOLOR_WHITE,

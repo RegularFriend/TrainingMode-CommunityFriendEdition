@@ -2598,11 +2598,36 @@ void Message_Manager(GOBJ *mngr_gobj)
                 Text *this_msg_text = this_msg_data->text;
                 JOBJ *this_msg_jobj = this_msg_gobj->hsd_object;
 
+                Memcard *memcard = R13_PTR(MEMCARD);
+                int osd_pos_type = memcard->TM_OSDPosition;
+                if (osd_pos_type > 2)
+                    osd_pos_type = 0;
+
+                Vec3 base_pos;
+                Vec2 pos_delta;
+
+                if (osd_pos_type == 0) {
+                    // above hud
+                    Vec3 *hud_pos = Match_GetPlayerHUDPos(i);
+
+                    base_pos.X = hud_pos->X;
+                    base_pos.Y = hud_pos->Y + MSG_HUDYOFFSET;
+                    base_pos.Z = hud_pos->Z;
+                    pos_delta = stc_msg_queue_offsets_vertical[i];
+                } else if (osd_pos_type == 1) {
+                    // sides
+                    base_pos = stc_msg_queue_pos_sides[i];
+                    pos_delta = stc_msg_queue_offsets_vertical[i];
+                } else {
+                    // top
+                    base_pos = stc_msg_queue_pos_top[i];
+                    pos_delta = stc_msg_queue_offsets_horizontal[i];
+                }
+
                 // Get the onscreen position for this queue
-                float pos_delta = stc_msg_queue_offsets[i];
-                Vec3 base_pos = stc_msg_queue_pos[i];
-                Vec3 this_msg_pos;
-                this_msg_pos.X = base_pos.X; // Get this messages position
+                //float pos_delta = stc_msg_queue_offsets[i];
+
+                Vec3 this_msg_pos = {0, 0, 0};
 
                 switch (this_msg_data->state)
                 {
@@ -2611,18 +2636,20 @@ void Message_Manager(GOBJ *mngr_gobj)
                 {
 
                     // get time
-                    float t = (((float)MSGTIMER_SHIFT - this_msg_data->anim_timer) / MSGTIMER_SHIFT);
+                    float t = ((float)MSGTIMER_SHIFT - this_msg_data->anim_timer) / MSGTIMER_SHIFT;
 
                     // get initial and final position for animation
-                    float final_pos = base_pos.Y + ((float)j * pos_delta);
-                    float initial_pos = base_pos.Y + ((float)this_msg_data->prev_index * pos_delta);
-                    if (Pause_CheckStatus(0) == 1) // if using frame advance, do not animate
-                    {
-                        this_msg_pos.Y = final_pos;
-                    }
-                    else
-                    {
-                        this_msg_pos.Y = (BezierBlend(t) * (final_pos - initial_pos)) + initial_pos;
+                    float final_x = base_pos.X + (float)j * pos_delta.X;
+                    float final_y = base_pos.Y + (float)j * pos_delta.Y;
+                    float initial_x = base_pos.X + (float)this_msg_data->prev_index * pos_delta.X;
+                    float initial_y = base_pos.Y + (float)this_msg_data->prev_index * pos_delta.Y;
+                    if (Pause_CheckStatus(0) == 1) { // if using frame advance, do not animate
+                        this_msg_pos.X = final_x;
+                        this_msg_pos.Y = final_y;
+                    } else {
+                        float blend = BezierBlend(t);
+                        this_msg_pos.X = blend * (final_x - initial_x) + initial_x;
+                        this_msg_pos.Y = blend * (final_y - initial_y) + initial_y;
                     }
 
                     Vec3 scale = this_msg_jobj->scale;

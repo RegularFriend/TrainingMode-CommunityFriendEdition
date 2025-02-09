@@ -87,6 +87,58 @@ IncLoopLeft:
     stw r6, 0x0(r5)
     branchl r12, 0x803a74f0
 
+########################
+## Write OSD Position ##
+########################
+
+    # Create Text
+    mr r3, r30
+    bl OSDPositionText
+    mflr r4
+    lwz r5, -0x77C0(r13)
+    lbz r5, 0x1F28(r5)
+
+    # Fix value if invalid from removed max osd setting
+    cmpwi r5, 3
+    blt EndFixInvalidOSDPosition
+    li r5, 0
+EndFixInvalidOSDPosition:
+
+    cmpwi r5, 0
+    beql OSDPositionTextHUD
+    cmpwi r5, 1
+    beql OSDPositionTextSides
+    cmpwi r5, 2
+    beql OSDPositionTextTop
+    mflr r5
+
+    lfs f1, 0x1C(TextProp)
+    lfs f2, 0x20(TextProp)
+    branchl r12, 0x803a6b98
+    stb r3, 0x48(r31)
+
+    # Change Color
+    mr r4, r3
+    mr r3, r30
+    addi r5, sp, 0xF0
+    load r6, 0x8dff6eff
+    stw r6, 0x0(r5)
+    branchl r12, 0x803a74f0
+
+    # Create XY Text
+    mr r3, r30
+    bl XYText
+    mflr r4
+    lfs f1, 0x24(TextProp)
+    lfs f2, 0x28(TextProp)
+    branchl r12, 0x803a6b98
+
+    # Change Color
+    mr r4, r3
+    mr r3, r30
+    addi r5, sp, 0xF0
+    branchl r12, 0x803a74f0
+
 ###########################
 ## Write Right Side Text ##
 ###########################
@@ -198,14 +250,39 @@ TextProperties:
     .long 0x4423C000        # Right Text X Offset
     .long 0x43960000        # Center Title X
     .long 0xC22C0000        # Center Title Y
-    .long 0xC3200000        # Max Windows X
-    .long 0xC22C0000        # Max Windows Y
-    .long 0xC3700000        # XYText X
-    .long 0xC0E80000        # XYText Y
+    .float 0                # OSD Position text X
+    .float -43.0            # OSD Position text Y
+    .float -120.0           # XYText X
+    .float -7.25            # XYText Y
     .float 800
     .float -43.0
     .long 0x8dff6eff
     .float 630
+
+OSDPositionText:
+    blrl
+    .string "OSD Position: %s"
+    .align 2
+
+OSDPositionTextHUD:
+    blrl
+    .string "HUD"
+    .align 2
+
+OSDPositionTextSides:
+    blrl
+    .string "Sides"
+    .align 2
+
+OSDPositionTextTop:
+    blrl
+    .string "Top"
+    .align 2
+
+XYText:
+    blrl
+    .string "(X/Y)"
+    .align 2
 
 FDDRecommended:
     blrl
