@@ -1485,6 +1485,7 @@ enum cpu_option
     OPTCPU_SDIDIR,
     OPTCPU_ASDI,
     OPTCPU_SHIELD,
+    OPTCPU_SHIELDHEALTH,
     OPTCPU_SHIELDDIR,
     OPTCPU_INTANG,
     OPTCPU_MASH,
@@ -1593,6 +1594,14 @@ static EventOption LabOptions_CPU[OPTCPU_COUNT] = {
         .option_name = "Infinite Shields",
         .desc = "Adjust how shield health deteriorates.",
         .option_values = LabValues_Shield,
+    },
+    {
+        .option_kind = OPTKIND_INT,
+        .option_val = 60,
+        .value_num = 61,
+        .option_name = "Infinite Shields Health",
+        .option_values = "%i",
+        .desc = "Adjust the max shield health when using\ninfinite shields.",
     },
     {
         .option_kind = OPTKIND_STRING,

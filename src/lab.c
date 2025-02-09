@@ -6277,6 +6277,7 @@ void Event_Think(GOBJ *event)
 
     if (inf_shield)
     {
+        int health = LabOptions_CPU[OPTCPU_SHIELDHEALTH].option_val;
         for (int i = 0; i < 6; i++)
         {
             for (int ch = 0; ch < 2; ++ch)
@@ -6284,7 +6285,7 @@ void Event_Think(GOBJ *event)
                 GOBJ *fighter = Fighter_GetSubcharGObj(i, ch);
                 if (fighter == 0) continue;
                 FighterData *data = fighter->userdata;
-                data->shield.health = 60;
+                data->shield.health = health;
             }
         }
     }
