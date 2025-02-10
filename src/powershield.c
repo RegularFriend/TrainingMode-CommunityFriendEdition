@@ -61,8 +61,8 @@ static int falco_fastfall_delay = -1;
 void Event_Think(GOBJ *menu) {
     GOBJ *falco = Fighter_GetGObj(1);
     FighterData *falco_data = falco->userdata;
-    Fighter_ZeroCPUInputs(falco_data);
 
+    Fighter_ZeroCPUInputs(falco_data);
     falco_data->flags.no_reaction_always = true;
 
     int state = falco_data->state_id;

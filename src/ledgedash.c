@@ -350,46 +350,47 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
     }
 
     int curr_frame = event_data->action_state.timer++;
+    int hud_updating = curr_frame < (sizeof(event_data->action_state.action_log) / sizeof(u8));
 
-    // update action log
-    if (curr_frame < (sizeof(event_data->action_state.action_log) / sizeof(u8)))
+    // look for cliffwait
+    if (hmn_data->state_id == ASID_CLIFFWAIT)
     {
-        // look for cliffwait
-        if (hmn_data->state_id == ASID_CLIFFWAIT)
-        {
-            event_data->action_state.action_log[curr_frame] = LDACT_CLIFFWAIT;
-        }
-        // look for release
-        else if (hmn_data->state_id == ASID_FALL)
-        {
-            event_data->action_state.is_release = 1;
+        event_data->action_state.action_log[curr_frame] = LDACT_CLIFFWAIT;
+    }
+    // look for release
+    else if (hmn_data->state_id == ASID_FALL)
+    {
+        event_data->action_state.is_release = 1;
+        if (hud_updating)
             event_data->action_state.action_log[curr_frame] = LDACT_FALL;
-        }
-        // look for jump
-        else if ((hmn_data->state_id == ASID_JUMPAERIALF) || (hmn_data->state_id == ASID_JUMPAERIALB) ||
-                 (((hmn_data->kind == 4) || (hmn_data->kind == 15)) && ((hmn_data->state_id >= 341) && (hmn_data->state_id <= 345)))) // check for kirby and jiggs jump
-        {
-            event_data->action_state.is_jump = 1;
+    }
+    // look for jump
+    else if ((hmn_data->state_id == ASID_JUMPAERIALF) || (hmn_data->state_id == ASID_JUMPAERIALB) ||
+             (((hmn_data->kind == 4) || (hmn_data->kind == 15)) && ((hmn_data->state_id >= 341) && (hmn_data->state_id <= 345)))) // check for kirby and jiggs jump
+    {
+        event_data->action_state.is_jump = 1;
+        if (hud_updating)
             event_data->action_state.action_log[curr_frame] = LDACT_JUMP;
-        }
-        // look for airdodge
-        else if (hmn_data->state_id == ASID_ESCAPEAIR)
-        {
-            //event_data->action_state.is_airdodge = 1;
+    }
+    // look for airdodge
+    else if (hmn_data->state_id == ASID_ESCAPEAIR)
+    {
+        if (hud_updating)
             event_data->action_state.action_log[curr_frame] = LDACT_AIRDODGE;
-        }
-        // look for aerial
-        else if (hmn_data->atk_kind != 1)
-        {
-            event_data->action_state.is_aerial = 1;
+    }
+    // look for aerial
+    else if (hmn_data->atk_kind != 1)
+    {
+        event_data->action_state.is_aerial = 1;
+        if (hud_updating)
             event_data->action_state.action_log[curr_frame] = LDACT_ATTACK;
-        }
-        // look for land
-        else if (((hmn_data->state_id == ASID_LANDING) || (hmn_data->state_id == ASID_LANDINGFALLSPECIAL)) || ((hmn_data->state_id == ASID_WAIT) && (hmn_data->TM.state_frame == 0) && ((hmn_data->TM.state_prev != ASID_LANDING) || (hmn_data->TM.state_prev != ASID_LANDINGFALLSPECIAL)))) // this is first frame of a no impact land
-        {
-            event_data->action_state.is_land = 1;
+    }
+    // look for land
+    else if (((hmn_data->state_id == ASID_LANDING) || (hmn_data->state_id == ASID_LANDINGFALLSPECIAL)) || ((hmn_data->state_id == ASID_WAIT) && (hmn_data->TM.state_frame == 0) && ((hmn_data->TM.state_prev != ASID_LANDING) || (hmn_data->TM.state_prev != ASID_LANDINGFALLSPECIAL)))) // this is first frame of a no impact land
+    {
+        event_data->action_state.is_land = 1;
+        if (hud_updating)
             event_data->action_state.action_log[curr_frame] = LDACT_LANDING;
-        }
     }
 
     // grab airdodge angle
@@ -407,12 +408,20 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         }
     }
 
-    // look for actionable
-    if (((event_data->action_state.is_actionable == 0) && (event_data->action_state.is_release == 1)) &&
-        (((((hmn_data->state_id == ASID_WAIT) && ((hmn_data->TM.state_prev[0] != ASID_LANDING) || (hmn_data->TM.state_prev[0] != ASID_LANDINGFALLSPECIAL)) && (hmn_data->TM.state_frame > 0)) || (hmn_data->TM.state_prev[0] == ASID_WAIT)) && (hmn_data->TM.state_frame <= 1)) || // prev frame too cause you can attack on the same frame
-         ((hmn_data->state_id == ASID_LANDING) && (hmn_data->TM.state_frame >= hmn_data->attr.normal_landing_lag)) ||
-         ((hmn_data->TM.state_prev[0] == ASID_LANDING) && (hmn_data->TM.state_prev_frames[0] >= hmn_data->attr.normal_landing_lag))))
-    {
+    int released_ledge = event_data->action_state.is_release == 1;
+    int not_yet_actionable = event_data->action_state.is_actionable == 0;
+
+    int ledgedash_finished = false;
+    if (not_yet_actionable && released_ledge) {
+        // if actionable after landing
+        ledgedash_finished |= (hmn_data->state_id == ASID_LANDING)
+            && (hmn_data->TM.state_frame + 1 >= hmn_data->attr.normal_landing_lag);
+
+        // if entered wait without entering landing - probably from NIL
+        ledgedash_finished |= hmn_data->state_id == ASID_WAIT;
+    }
+
+    if (ledgedash_finished) {
         event_data->action_state.is_actionable = 1;
 
         // destroy any tips
