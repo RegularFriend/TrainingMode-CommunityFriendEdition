@@ -1,6 +1,7 @@
 #include "../MexTK/mex.h"
 #include "events.h"
 
+void Exit(int value);
 
 enum menu_options {
     OPT_FIRE_SPEED,
@@ -38,7 +39,13 @@ static EventOption Options_Main[] = {
         .option_name = "Laser Height",
         .desc = "Change the laser height.",
         .option_values = Options_LaserHeight,
-    }
+    },
+    {
+        .option_kind = OPTKIND_FUNC,
+        .option_name = "Exit",
+        .desc = "Return to the Event Select Screen.",
+        .onOptionSelect = Exit,
+    },
 };
 
 static EventMenu Menu_Main = {
@@ -55,6 +62,8 @@ void Event_Think(GOBJ *menu) {
     GOBJ *falco = Fighter_GetGObj(1);
     FighterData *falco_data = falco->userdata;
     Fighter_ZeroCPUInputs(falco_data);
+
+    falco_data->flags.no_reaction_always = true;
 
     int state = falco_data->state_id;
     int state_frame = falco_data->TM.state_frame;
@@ -126,6 +135,12 @@ void Event_Think(GOBJ *menu) {
         falco_data->cpu.lstickY = -127;
         falco_fastfall_delay = -1;
     }
+}
+
+void Exit(int value) {
+    Match *match = MATCH;
+    match->state = 3;
+    Match_EndVS();
 }
 
 EventMenu *Event_Menu = &Menu_Main;
