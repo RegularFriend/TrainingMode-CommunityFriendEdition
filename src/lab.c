@@ -1373,6 +1373,24 @@ int Lab_CPUPerformAction(GOBJ *cpu, int action_id, GOBJ *hmn)
     return action_done;
 }
 
+void CPUResetVars(void) {
+    LabData *eventData = event_vars->event_gobj->userdata;
+
+    // reset CPU think variables
+    eventData->cpu_state = CPUSTATE_START;
+    eventData->cpu_hitshield = 0;
+    eventData->cpu_hitnum = 0;
+    eventData->cpu_countertimer = 0;
+    eventData->cpu_hitshield = 0;
+    eventData->cpu_lasthit = -1;
+    eventData->cpu_lastshieldstun = -1;
+    eventData->cpu_hitkind = -1;
+    eventData->cpu_hitshieldnum = 0;
+    eventData->cpu_isactionable = 0;
+    eventData->cpu_sdinum = 0;
+    eventData->cpu_miss_tech_wait_timer = 0;
+}
+
 void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
 {
     // get gobjs data
@@ -2275,7 +2293,6 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
     case (CPUSTATE_RECOVER):
     CPULOGIC_RECOVER:
     {
-
         // if onstage, go back to start
         if (cpu_data->phys.air_state == 0)
         {
@@ -2284,18 +2301,7 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
             // clear inputs
 
             // go to start
-            eventData->cpu_state = CPUSTATE_START;
-            eventData->cpu_hitshield = 0;
-            eventData->cpu_hitnum = 0;
-            eventData->cpu_countertimer = 0;
-            eventData->cpu_hitshield = 0;
-            eventData->cpu_lasthit = -1;
-            eventData->cpu_lastshieldstun = -1;
-            eventData->cpu_hitkind = -1;
-            eventData->cpu_hitshieldnum = 0;
-            eventData->cpu_isactionable = 0;
-            eventData->cpu_sdinum = 0;
-            eventData->cpu_miss_tech_wait_timer = 0;
+            CPUResetVars();
             goto CPULOGIC_START;
         }
 
@@ -4384,6 +4390,8 @@ void Record_LoadSavestate(Savestate *savestate) {
     event_vars->game_timer = rec_state->frame;
     rec_data.restore_timer = 0;
 
+    CPUResetVars();
+
     stc_playback_cancelled_hmn = false;
     stc_playback_cancelled_cpu = false;
 
@@ -6000,19 +6008,7 @@ void Event_Think_LabState_Normal(GOBJ *event) {
 
                             if (is_moved == 1)
                             {
-
-                                // reset CPU think variables
-                                eventData->cpu_state = CPUSTATE_START;
-                                eventData->cpu_hitshield = 0;
-                                eventData->cpu_hitnum = 0;
-                                eventData->cpu_countertimer = 0;
-                                eventData->cpu_hitshield = 0;
-                                eventData->cpu_lasthit = -1;
-                                eventData->cpu_lastshieldstun = -1;
-                                eventData->cpu_hitkind = -1;
-                                eventData->cpu_hitshieldnum = 0;
-                                eventData->cpu_isactionable = 0;
-                                eventData->cpu_sdinum = 0;
+                                CPUResetVars();
                             }
                         }
                     }
@@ -6059,7 +6055,25 @@ void Event_Think_LabState_Normal(GOBJ *event) {
             stc_playback_cancelled_cpu |= Record_PastLastInput(1);
             break;
         case PLAYBACKCOUNTER_ON_HIT_CPU:
-            stc_playback_cancelled_cpu |= is_hitlag_victim(cpu);
+            if (!stc_playback_cancelled_cpu) {
+                if (is_hitlag_victim(cpu) && eventData->cpu_lasthit != cpu_data->dmg.atk_instance_hurtby) {
+                    eventData->cpu_countertimer = 0;
+                    eventData->cpu_hitnum++;
+                    eventData->cpu_lasthit = cpu_data->dmg.atk_instance_hurtby;
+                    eventData->cpu_hitkind = HITKIND_DAMAGE;
+                }
+
+                int min_hitnum = LabOptions_CPU[OPTCPU_CTRHITS].option_val;
+                int counter_delay = LabOptions_CPU[OPTCPU_CTRFRAMES].option_val;
+
+                if (eventData->cpu_hitnum >= min_hitnum && eventData->cpu_countertimer >= counter_delay) {
+                    stc_playback_cancelled_cpu = true;
+                    eventData->cpu_state = CPUSTATE_COUNTER;
+                } else if (!in_hitstun_anim(cpu) || hitstun_ended(cpu)) {
+                    eventData->cpu_countertimer++;
+                }
+            }
+
             break;
         case PLAYBACKCOUNTER_ON_HIT_HMN:
             stc_playback_cancelled_cpu |= is_hitlag_victim(hmn);

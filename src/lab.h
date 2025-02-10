@@ -89,6 +89,7 @@ static int is_hitlag_victim(GOBJ *character);
 void CustomTDI_Update(GOBJ *gobj);
 void CustomTDI_Destroy(GOBJ *gobj);
 void CustomTDI_Apply(GOBJ *cpu, GOBJ *hmn, CustomTDI *di);
+void CPUResetVars(void);
 
 // ACTIONS #################################################
 
