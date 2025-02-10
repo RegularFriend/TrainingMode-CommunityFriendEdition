@@ -16,7 +16,7 @@ OSD_FighterSpecificTech:
     li r3, 1
     slw r0, r3, r0
     and. r0, r0, r4
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
     # Check Fighter
     lwz r3, 0x4(playerdata)  # load fighter Internal ID
@@ -28,7 +28,7 @@ OSD_FighterSpecificTech:
     beq Yoshi
 
     # Check If Anyone Else
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # /////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +54,7 @@ FoxFalco:
     cmpwi r3, 0x16E
     beq FoxFalco_ShineAirLoop
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # --------
 
@@ -62,7 +62,7 @@ FoxFalco_SideBStart:
     # Check If Pressed B
     lwz r3, 0x668(playerdata)
     rlwinm. r3, r3, 0, 22, 22
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
     # Get Frames Early
     lwz r7, 0x590(playerdata)       # get anim data
@@ -81,7 +81,7 @@ FoxFalco_SideBStart:
     mflr r6
     Message_Display
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # --------
 
@@ -89,7 +89,7 @@ FoxFalco_SideB:
     # Check If Pressed B
     lwz r3, 0x668(playerdata)
     rlwinm. r3, r3, 0, 22, 22
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
     # Get Press Frame
     lfs f1, 0x894(playerdata)
@@ -105,7 +105,7 @@ FoxFalco_SideB:
     mflr r6
     Message_Display
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # --------
 
@@ -113,7 +113,7 @@ FoxFalco_SideBEnd:
     # Check If Pressed B
     lwz r3, 0x668(playerdata)
     rlwinm. r3, r3, 0, 22, 22
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
     li r3, OSD.FighterSpecificTech  # ID
     lbz r4, 0xC(playerdata)         # queue
@@ -122,7 +122,7 @@ FoxFalco_SideBEnd:
     mflr r6
     Message_Display
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # --------
 
@@ -130,7 +130,7 @@ FoxFalco_ShineGroundLoop:
     # Check For JC
     bl CheckForJumpCancel
     cmpwi r3, 0x0
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
 FoxFalco_ShineGroundLoop_SetColor:
     load r5, MSGCOLOR_RED
@@ -147,7 +147,7 @@ FoxFalco_ShineGroundLoop_EndSetColor:
     lhz r7, 0x23F8(playerdata)
     Message_Display
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # --------
 
@@ -156,12 +156,12 @@ FoxFalco_ShineAirLoop:
     lbz r3, 0x1968(playerdata)      # Jumps Used
     lwz r0, 0x0168(playerdata)      # Total Jumps
     cmpw r3, r0
-    bge OSD_Lockout
+    bge FighterSpecificTech_End
 
     # Check For JC
     bl CheckForJumpCancel
     cmpwi r3, 0x0
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
 FoxFalco_ShineAirLoop_SetColor:
     load r5, MSGCOLOR_RED
@@ -179,7 +179,7 @@ FoxFalco_ShineAirLoop_EndSetColor:
     lhz r7, 0x23F8(playerdata)
     Message_Display
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # /////////////////////////////////////////////////////////////////////////////
 
@@ -188,14 +188,14 @@ Yoshi:
     cmpwi r3, 0x159    # Parry Start
     beq Yoshi_Parry
 
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # --------
 
 Yoshi_Parry:
     bl CheckForJumpCancel
     cmpwi r3, 0x0
-    beq OSD_Lockout
+    beq FighterSpecificTech_End
 
 Yoshi_PrintJumpOoParryText:
     load r5, MSGCOLOR_WHITE
@@ -205,7 +205,7 @@ Yoshi_PrintJumpOoParryText:
     mflr r6
     lhz r7, 0x23F8(playerdata)
     Message_Display
-    b OSD_Lockout
+    b FighterSpecificTech_End
 
 # /////////////////////////////////////////////////////////////////////////////
 
@@ -273,6 +273,8 @@ Yoshi_JumpOoParryText:
     .string "Jump OoParry\nFrame %d"
     .align 2
 
+FighterSpecificTech_End:
+
 ##############################
 
 OSD_Lockout:
@@ -283,25 +285,25 @@ OSD_Lockout:
     li r3, 1
     slw r0, r3, r0
     and. r0, r0, r4
-    beq Exit
+    beq Lockout_End
 
     # dont show if in the air
     lwz r3, 0xE0(playerdata) # air_state
     cmpwi r3, 1
-    beq Exit
+    beq Lockout_End
 
     # dont show if in dtilt / dsmash
     lwz r3, 0x10(playerdata) # state_id
     cmpwi r3, ASID_AttackLw3
-    beq Exit
+    beq Lockout_End
     cmpwi r3, ASID_AttackLw4
-    beq Exit
+    beq Lockout_End
 
     # dont show if stick is vertical
     lfs f0, 0x624(playerdata) # input.stick.y
     fsubs f1, f1, f1 # zero f1
     fcmpo cr0, f0, f1
-    bge Exit
+    bge Lockout_End
 
     lbz r7, 0x674(playerdata) # input.timer_lstick_smash_y
     li r5, MSGCOLOR_RED
@@ -309,7 +311,7 @@ OSD_Lockout:
     blt Lockout_InLockout
     li r5, MSGCOLOR_GREEN
     cmpwi r7, 25
-    bge Exit
+    bge Lockout_End
 
 Lockout_InLockout:
     addi r7, r7, 1 # 1-index timer
@@ -319,12 +321,16 @@ Lockout_InLockout:
     li r3, OSD.LockoutTimers        # ID
     lbz r4, 0xC(playerdata)         # queue
     Message_Display
-    b Exit
+    b Lockout_End
 
 LockoutText:
     blrl
     .string "DTilt Lockout\nFrame %d"
     .align 2
+
+Lockout_End:
+
+##############################
 
 Exit:
     restoreall
