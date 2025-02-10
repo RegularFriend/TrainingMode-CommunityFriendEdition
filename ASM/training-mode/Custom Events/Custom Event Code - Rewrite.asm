@@ -2383,10 +2383,6 @@ ReversalDTilt:
     b ReversalCheckToReset
 
 ReversalGetupAttackStomach:
-    # Enter DownWait
-    mr r3, P2GObj
-    branchl r12, 0x80097e8c
-
     li r3, 0x100
     stw r3, 0x1A88(r29)
     li r3, 0x1
@@ -2527,6 +2523,23 @@ ReversalLoadState:
     # Reset AerialThinkStruct
     li r3, 0x0
     stw r3, AerialThinkStruct(r31)
+
+Reversal_CheckEnterDownWait:
+    lbz r3, CPUAttack(MenuData)
+    cmpwi r3, 0xB
+    beq Reversal_EnterDownBoundD
+    cmpwi r3, 0xC
+    beq Reversal_EnterDownBoundU
+    b ReversalThinkExit
+
+Reversal_EnterDownBoundU:
+    # Hack: set state id as DownBoundU to force back getup attack
+    li r3, 183
+    stw r3, 0x10(P2Data)
+
+Reversal_EnterDownBoundD:
+    mr r3, P2GObj
+    branchl r12, 0x80097e8c
 
 ReversalThinkExit:
     mr r3, MenuData
