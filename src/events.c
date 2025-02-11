@@ -3138,8 +3138,6 @@ void EventMenu_Update(GOBJ *gobj)
 
         if (menuData->mode == MenuMode_Shortcut)
         {
-            MENUMODE_SHORTCUT:
-
             ShortcutList *shortcuts = menuData->currMenu->shortcuts;
             if (shortcuts != 0)
             {
