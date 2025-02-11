@@ -3194,7 +3194,7 @@ void EventMenu_Update(GOBJ *gobj)
 
         if (menuData->mode == MenuMode_ShortcutWaitForRelease)
         {
-            if (pad->held == 0)
+            if ((pad->held & SHORTCUT_BUTTONS) == 0)
                 exit_menu = 1;
         }
     }
