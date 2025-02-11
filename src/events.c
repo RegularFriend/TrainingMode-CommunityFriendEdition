@@ -3090,15 +3090,18 @@ void EventMenu_Update(GOBJ *gobj)
     }
 
     // if this menu has an upate function, run its function
-    else if ((menuData->isPaused == 1) && (currMenu->menu_think != 0))
+    else if ((menuData->mode == MenuMode_Paused) && (currMenu->menu_think != 0))
     {
         update_menu = currMenu->menu_think(gobj);
     }
 
+    int exit_menu = 0;
+    int enter_menu = 0;
+
     if (update_menu == 1)
     {
         // Check if being pressed
-        int isPress = 0;
+        int pause_pressed = 0;
         for (int i = 0; i < 6; i++)
         {
 
@@ -3116,76 +3119,40 @@ void EventMenu_Update(GOBJ *gobj)
                 {
                     if ((pad->held & HSD_BUTTON_X) && (pad->down & HSD_BUTTON_DPAD_UP))
                     {
-                        isPress = 1;
+                        pause_pressed = 1;
                         menuData->controller_index = controller_index;
                         break;
                     }
                 }
-                else
+                else if ((pad->down & HSD_BUTTON_START) != 0)
                 {
-                    if ((pad->down & HSD_BUTTON_START) != 0)
-                    {
-                        isPress = 1;
-                        menuData->controller_index = controller_index;
-                        break;
-                    }
+                    pause_pressed = 1;
+                    menuData->controller_index = controller_index;
+                    break;
                 }
             }
         }
 
+        HSD_Pad *pad = PadGet(menuData->controller_index, PADGET_MASTER);
+
         // change pause state
-        if (isPress != 0)
+        if (pause_pressed != 0)
         {
-
-            // pause game
-            if (menuData->isPaused == 0)
-            {
-
-                // set state
-                menuData->isPaused = 1;
-
-                // Create menu
-                EventMenu_CreateModel(gobj, currMenu);
-                EventMenu_CreateText(gobj, currMenu);
-                EventMenu_UpdateText(gobj, currMenu);
-                if (currMenu->state == EMSTATE_OPENPOP)
-                {
-                    EventOption *currOption = &currMenu->options[currMenu->cursor];
-                    EventMenu_CreatePopupModel(gobj, currMenu);
-                    EventMenu_CreatePopupText(gobj, currMenu);
-                    EventMenu_UpdatePopupText(gobj, currOption);
-                }
-
-                // Freeze the game
-                Match_FreezeGame(1);
-                SFX_PlayCommon(5);
-                Match_HideHUD();
-                Match_AdjustSoundOnPause(1);
-            }
-            // unpause game
-            else
-            {
-
-                menuData->isPaused = 0;
-
-                // destroy menu
-                EventMenu_DestroyMenu(gobj);
-
-                // Unfreeze the game
-                Match_UnfreezeGame(1);
-                Match_ShowHUD();
-                Match_AdjustSoundOnPause(0);
-            }
+            enter_menu = menuData->mode == MenuMode_Normal;
+            exit_menu = menuData->mode != MenuMode_Normal;
         }
 
         // run menu logic if the menu is shown
-        else if ((menuData->isPaused == 1) && (stc_event_vars.hide_menu == 0))
+        if (menuData->mode == MenuMode_Paused && stc_event_vars.hide_menu == 0)
         {
             // Get the current menu
             EventMenu *currMenu = menuData->currMenu;
 
+            if ((pad->down & HSD_BUTTON_Y) != 0 && menuData->currMenu->shortcuts != 0)
+                menuData->mode = MenuMode_Shortcut;
+
             // menu think
-            if (currMenu->state == EMSTATE_FOCUS)
+            else if (currMenu->state == EMSTATE_FOCUS)
             {
                 // check to run custom menu think function
                 EventMenu_MenuThink(gobj, currMenu);
@@ -3195,6 +3162,78 @@ void EventMenu_Update(GOBJ *gobj)
             else if (currMenu->state == EMSTATE_OPENPOP)
                 EventMenu_PopupThink(gobj, currMenu);
         }
+
+        if (menuData->mode == MenuMode_Shortcut)
+        {
+            ShortcutList *shortcuts = menuData->currMenu->shortcuts;
+            if (shortcuts != 0)
+            {
+                stc_event_vars.hide_menu = 1;
+                int held_shortcut_buttons = pad->held & SHORTCUT_BUTTONS;
+
+                for (int i = 0; i < shortcuts->count; ++i)
+                {
+                    Shortcut *shortcut = &shortcuts->list[i];
+
+                    if (held_shortcut_buttons == shortcut->buttons_mask)
+                    {
+                        if (shortcut->option != 0) {
+                            EventOption *option = shortcut->option;
+                            option->option_val = (option->option_val + 1) % option->value_num;
+                            if (option->onOptionChange)
+                                option->onOptionChange(stc_event_vars.menu_gobj, option->option_val);
+                            SFX_PlayCommon(2);
+                        }
+
+                        menuData->mode = MenuMode_ShortcutWaitForRelease;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (menuData->mode == MenuMode_ShortcutWaitForRelease)
+        {
+            if (pad->held == 0)
+                exit_menu = 1;
+        }
+    }
+
+    if (enter_menu != 0)
+    {
+        // set state
+        menuData->mode = MenuMode_Paused;
+
+        // Create menu
+        EventMenu_CreateModel(gobj, currMenu);
+        EventMenu_CreateText(gobj, currMenu);
+        EventMenu_UpdateText(gobj, currMenu);
+        if (currMenu->state == EMSTATE_OPENPOP)
+        {
+            EventOption *currOption = &currMenu->options[currMenu->cursor];
+            EventMenu_CreatePopupModel(gobj, currMenu);
+            EventMenu_CreatePopupText(gobj, currMenu);
+            EventMenu_UpdatePopupText(gobj, currOption);
+        }
+
+        // Freeze the game
+        Match_FreezeGame(1);
+        SFX_PlayCommon(5);
+        Match_HideHUD();
+        Match_AdjustSoundOnPause(1);
+    }
+
+    if (exit_menu != 0)
+    {
+        menuData->mode = MenuMode_Normal;
+
+        // destroy menu
+        EventMenu_DestroyMenu(gobj);
+
+        // Unfreeze the game
+        Match_UnfreezeGame(1);
+        Match_ShowHUD();
+        Match_AdjustSoundOnPause(0);
     }
 
     return;

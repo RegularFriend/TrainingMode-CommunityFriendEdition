@@ -29,6 +29,8 @@
 #define OSReport TMLOG
 #endif
 
+#define SHORTCUT_BUTTONS (HSD_BUTTON_A | HSD_BUTTON_B | HSD_BUTTON_X | HSD_TRIGGER_Z)
+
 // Custom File Structs
 typedef struct evMenu
 {
@@ -107,6 +109,14 @@ typedef struct EventOption
     void (*onOptionChange)(GOBJ *menu_gobj, int value); // function that runs when option is changed
     GOBJ *(*onOptionSelect)(GOBJ *menu_gobj);           // function that runs when option is selected
 } EventOption;
+typedef struct Shortcut {
+    int buttons_mask;
+    EventOption *option;
+} Shortcut;
+typedef struct ShortcutList {
+    int count;
+    Shortcut *list;
+} ShortcutList;
 struct EventMenu
 {
     char *name;                         // name of this menu
@@ -117,14 +127,21 @@ struct EventMenu
     EventOption *options;               // pointer to all of this menu's options
     EventMenu *prev;                    // pointer to previous menu, used at runtime
     int (*menu_think)(GOBJ *menu_gobj); // function that runs every frame of this menu. returns a bool which indicates if basic menu code should be execution
+    ShortcutList *shortcuts;            // pointer to shortcuts when shortcut mode is entered on this menu
 };
+typedef enum MenuMode {
+    MenuMode_Normal,
+    MenuMode_Paused,
+    MenuMode_Shortcut,
+    MenuMode_ShortcutWaitForRelease,
+} MenuMode;
 typedef struct MenuData
 {
     EventDesc *event_desc;
     EventMenu *currMenu;
     u16 canvas_menu;
     u16 canvas_popup;
-    u8 isPaused;
+    u8 mode;
     u8 controller_index; // index of the controller who paused
     Text *text_name;
     Text *text_value;
