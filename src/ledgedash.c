@@ -413,9 +413,13 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
 
     int ledgedash_finished = false;
     if (not_yet_actionable && released_ledge) {
-        // if actionable after landing
-        ledgedash_finished |= (hmn_data->state_id == ASID_LANDING)
-            && (hmn_data->TM.state_frame + 1 >= hmn_data->attr.normal_landing_lag);
+        // if actionable after normal landing
+        ledgedash_finished |= hmn_data->state_id == ASID_LANDING
+            && hmn_data->TM.state_frame + 1 >= hmn_data->attr.normal_landing_lag;
+
+        // if actionable after airdodge landing
+        ledgedash_finished |= hmn_data->state_id == ASID_LANDINGFALLSPECIAL
+            && hmn_data->TM.state_frame == 9;
 
         // if entered wait without entering landing - probably from NIL
         ledgedash_finished |= hmn_data->state_id == ASID_WAIT;
