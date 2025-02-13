@@ -268,8 +268,8 @@ void Wavedash_Think(WavedashData *event_data, FighterData *hmn_data)
                  ((hmn_data->state_id == ASID_LANDINGFALLSPECIAL) && (hmn_data->TM.state_frame == 0) && (hmn_data->TM.state_prev[0] == ASID_ESCAPEAIR) && (hmn_data->TM.state_prev_frames[0] == 0))))
             {
                 // save airdodge angle
-                float angle = atan2(hmn_data->input.lstick.Y, hmn_data->input.lstick.X) - -(M_PI / 2);
-                event_data->wd_angle = angle;
+                Vec2 lstick = hmn_data->input.lstick;
+                event_data->wd_angle = atan2(fabs(lstick.Y), fabs(lstick.X));
 
                 event_data->is_early_airdodge = 0;
                 event_data->is_airdodge = 1;
