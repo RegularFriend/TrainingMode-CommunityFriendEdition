@@ -1110,11 +1110,15 @@ void EventInit(int page, int eventID, MatchInit *matchData)
 
     Preload *preload = Preload_GetTable();
 
-    // Determine player ports
-    u8 hmn_port = *stc_css_hmnport + 1;
-    u8 cpu_port = *stc_css_cpuport + 1;
+    // set to enter fall on match start
+    for (int i = 0; i < 6; i++)
+        matchData->playerData[i].isEntry = false;
 
     if (event->CSSType != SLCHRKIND_VS) {
+        // Determine player ports
+        u8 hmn_port = *stc_css_hmnport + 1;
+        u8 cpu_port = *stc_css_cpuport + 1;
+
         // Initialize all player data
         Memcard *memcard = R13_PTR(MEMCARD);
         CSSBackup eventBackup = memcard->EventBackup;
@@ -1122,9 +1126,6 @@ void EventInit(int page, int eventID, MatchInit *matchData)
         {
             // initialize data
             CSS_InitPlayerData(&matchData->playerData[i]);
-
-            // set to enter fall on match start
-            matchData->playerData[i].isEntry = false;
 
             // copy nametag id for the player
             if (i == 0)
