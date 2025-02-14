@@ -1110,10 +1110,6 @@ void EventInit(int page, int eventID, MatchInit *matchData)
 
     Preload *preload = Preload_GetTable();
 
-    // set to enter fall on match start
-    for (int i = 0; i < 6; i++)
-        matchData->playerData[i].isEntry = false;
-
     if (event->CSSType != SLCHRKIND_VS) {
         // Determine player ports
         u8 hmn_port = *stc_css_hmnport + 1;
@@ -1150,6 +1146,9 @@ void EventInit(int page, int eventID, MatchInit *matchData)
             cpu_costume = 0;
         }
 
+        if (cpu_kind == CKIND_ZELDA)
+            cpu_kind = CKIND_SHEIK;
+
         if (cpu_kind != -1) {
             matchData->playerData[1].costume = cpu_costume;
             matchData->playerData[1].c_kind = cpu_kind;
@@ -1174,8 +1173,11 @@ void EventInit(int page, int eventID, MatchInit *matchData)
                 hudPos++;
         }
         matchData->hudPos = hudPos;
-
     }
+
+    // set to enter fall on match start
+    for (int i = 0; i < 6; i++)
+        matchData->playerData[i].isEntry = false;
 
     // Determine the Stage
     matchData->stage = event->isSelectStage ? preload->queued.stage : eventMatchData->stage;
