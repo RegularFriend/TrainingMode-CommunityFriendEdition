@@ -47,7 +47,7 @@ EventDesc Lab = {
     .eventDescription = "Free practice with\ncomplete control.\n",
     .eventFile = "lab",
     .eventCSSFile = "TM/labCSS.dat",
-    .isChooseCPU = true,
+    .CSSType = SLCHRKIND_TRAINING,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -90,7 +90,7 @@ EventDesc LCancel = {
     .eventName = "L-Cancel Training\n",
     .eventDescription = "Practice L-Cancelling on\na stationary CPU.\n",
     .eventFile = "lcancel",
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -132,7 +132,7 @@ EventDesc Ledgedash = {
     .eventName = "Ledgedash Training\n",
     .eventDescription = "Practice Ledgedashes!\nUse D-Pad to change ledge.\n",
     .eventFile = "ledgedash",
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -174,7 +174,7 @@ EventDesc Wavedash = {
     .eventName = "Wavedash Training\n",
     .eventDescription = "Practice timing your wavedash,\na fundamental movement technique.\n",
     .eventFile = "wavedash",
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -217,7 +217,7 @@ EventDesc Combo = {
     .eventName = "Combo Training\n",
     .eventDescription = "L+DPad adjusts percent | DPadDown moves CPU\nDPad right/left saves and loads positions.",
     .eventFile = 0,
-    .isChooseCPU = true,
+    .CSSType = SLCHRKIND_TRAINING,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -259,7 +259,7 @@ EventDesc AttackOnShield = {
     .eventName = "Attack on Shield\n",
     .eventDescription = "Practice attacks on a shielding opponent\nPause to change their OoS option.\n",
     .eventFile = 0,
-    .isChooseCPU = true,
+    .CSSType = SLCHRKIND_TRAINING,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -301,7 +301,7 @@ EventDesc Reversal = {
     .eventName = "Reversal Training\n",
     .eventDescription = "Practice OoS punishes! DPad left/right\nmoves characters closer and further apart.",
     .eventFile = 0,
-    .isChooseCPU = true,
+    .CSSType = SLCHRKIND_TRAINING,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -342,7 +342,7 @@ EventDesc SDI = {
     .eventName = "SDI Training\n",
     .eventDescription = "Use Smash DI to escape\nFox's up-air!",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -384,7 +384,7 @@ EventDesc Powershield = {
     .eventName = "Powershield Training\n",
     .eventDescription = "Powershield Falco's laser!",
     .eventFile = "powershield",
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -425,7 +425,7 @@ EventDesc Ledgetech = {
     .eventName = "Ledge-Tech Training\n",
     .eventDescription = "Practice ledge-teching\nFalco's down-smash!",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -466,7 +466,7 @@ EventDesc AmsahTech = {
     .eventName = "Amsah-Tech Training\n",
     .eventDescription = "Taunt to have Marth Up-B,\nthen ASDI down and tech!\n",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -507,7 +507,7 @@ EventDesc ShieldDrop = {
     .eventName = "Shield Drop Training\n",
     .eventDescription = "Counter with a shield-drop aerial!\nDPad left/right moves players apart.",
     .eventFile = 0,
-    .isChooseCPU = true,
+    .CSSType = SLCHRKIND_TRAINING,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -548,7 +548,7 @@ EventDesc WaveshineSDI = {
     .eventName = "Waveshine SDI\n",
     .eventDescription = "Use Smash DI to get out\nof Fox's waveshine!",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -589,7 +589,7 @@ EventDesc SlideOff = {
     .eventName = "Slide-Off Training\n",
     .eventDescription = "Use Slide-Off DI to slide off\nthe platform and counter attack!\n",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -630,7 +630,7 @@ EventDesc GrabMash = {
     .eventName = "Grab Mash Training\n",
     .eventDescription = "Mash buttons to escape the grab\nas quickly as possible!\n",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -671,7 +671,7 @@ EventDesc TechCounter = {
     .eventName = "Ledgetech Marth Counter\n",
     .eventDescription = "Practice ledge-teching\nMarth's counter!\n",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -712,7 +712,7 @@ EventDesc ArmadaShine = {
     .eventName = "Edgeguard Firefox Training\n",
     .eventDescription = "Finish off the enemy Fox\nafter he uses Firefox!",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -753,7 +753,7 @@ EventDesc SideBSweet = {
     .eventName = "Side-B Sweetspot\n",
     .eventDescription = "Use a sweetspot Side-B to avoid Marth's\ndown-tilt and grab the ledge!",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -794,7 +794,7 @@ EventDesc EscapeSheik = {
     .eventName = "Escape Sheik Techchase\n",
     .eventDescription = "Practice escaping the tech chase with a\nframe perfect shine or jab SDI!\n",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -835,7 +835,7 @@ EventDesc Eggs = {
     .eventName = "Eggs-ercise\n",
     .eventDescription = "Break the eggs! Only strong hits will\nbreak them. DPad down = free practice.",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = true,
     .use_savestates = false,
     .disable_hazards = true,
@@ -876,7 +876,7 @@ EventDesc Multishine = {
     .eventName = "Shined Blind\n",
     .eventDescription = "How many shines can you\nperform in 10 seconds?",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -917,7 +917,7 @@ EventDesc Reaction = {
     .eventName = "Reaction Test\n",
     .eventDescription = "Test your reaction time by pressing\nany button when you see/hear Fox shine!",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -958,7 +958,7 @@ EventDesc Ledgestall = {
     .eventName = "Under Fire\n",
     .eventDescription = "Ledgestall to remain\ninvincible while the lava rises!\n",
     .eventFile = 0,
-    .isChooseCPU = false,
+    .CSSType = SLCHRKIND_EVENT,
     .isSelectStage = false,
     .use_savestates = false,
     .disable_hazards = true,
@@ -1072,6 +1072,10 @@ void EventInit(int page, int eventID, MatchInit *matchData)
 
     // get event pointer
     EventDesc *event = GetEventDesc(page, eventID);
+    EventMatchData *eventMatchData = event->matchData;
+
+    if (event->CSSType == SLCHRKIND_VS)
+        memcpy(matchData, &(*stc_css_minorscene)->vs_data.match_init, sizeof(*matchData));
 
     //Init default match info
     matchData->timer_unk2 = 0;
@@ -1084,7 +1088,6 @@ void EventInit(int page, int eventID, MatchInit *matchData)
     matchData->onStartMelee = EventLoad;
 
     //Copy event's match info struct
-    EventMatchData *eventMatchData = event->matchData;
     matchData->timer = eventMatchData->timer;
     matchData->matchType = eventMatchData->matchType;
     matchData->isDisableMusic = eventMatchData->isDisableMusic;
@@ -1105,127 +1108,76 @@ void EventInit(int page, int eventID, MatchInit *matchData)
     matchData->timer_seconds = eventMatchData->timerSeconds;
     matchData->timer_subseconds = eventMatchData->timerSubSeconds;
 
-    // Initialize all player data
-    Memcard *memcard = R13_PTR(MEMCARD);
-    CSSBackup eventBackup = memcard->EventBackup;
-    for (int i = 0; i < 6; i++)
-    {
-        // initialize data
-        CSS_InitPlayerData(&matchData->playerData[i]);
-
-        // set to enter fall on match start
-        matchData->playerData[i].isEntry = false;
-
-        // copy nametag id for the player
-        if (i == 0)
-        {
-            // Update the player's nametag ID
-            matchData->playerData[i].nametag = eventBackup.nametag;
-
-            // Update the player's rumble setting
-            int tagRumble = CSS_GetNametagRumble(0, matchData->playerData[0].nametag);
-            matchData->playerData[0].isRumble = tagRumble;
-        }
-    }
+    Preload *preload = Preload_GetTable();
 
     // Determine player ports
     u8 hmn_port = *stc_css_hmnport + 1;
     u8 cpu_port = *stc_css_cpuport + 1;
 
-    // Determine the Player
-    s32 playerKind;
-    s32 playerCostume;
-    Preload *preload = Preload_GetTable();
-    // If fighter is -1, copy the player from event data
-    if (eventMatchData->playerKind != -1)
-    {
-        playerKind = eventMatchData->playerKind;
-        playerCostume = 0;
-    }
-    // use the fighter chosen on the CSS
-    else
-    {
-        playerKind = preload->queued.fighters[0].kind;
-        playerCostume = preload->queued.fighters[0].costume;
-    }
-
-    if (event->force_sopo && playerKind == CKIND_ICECLIMBERS)
-    {
-        // Change ICs to Popo
-        playerKind = CKIND_POPO;
-    }
-
-    // Determine the CPU
-    s32 cpuKind;
-    s32 cpuCostume;
-    // If isChooseCPU is true, use the selected CPU
-    if (event->isChooseCPU)
-    {
-        cpuKind = preload->queued.fighters[1].kind;
-        cpuCostume = preload->queued.fighters[1].costume;
-
-        // change zelda to sheik
-        if (cpuKind == CKIND_ZELDA)
+    if (event->CSSType != SLCHRKIND_VS) {
+        // Initialize all player data
+        Memcard *memcard = R13_PTR(MEMCARD);
+        CSSBackup eventBackup = memcard->EventBackup;
+        for (int i = 0; i < 6; i++)
         {
-            cpuKind = CKIND_SHEIK;
-            preload->queued.fighters[1].kind = cpuKind;
+            // initialize data
+            CSS_InitPlayerData(&matchData->playerData[i]);
+
+            // set to enter fall on match start
+            matchData->playerData[i].isEntry = false;
+
+            // copy nametag id for the player
+            if (i == 0)
+            {
+                // Update the player's nametag ID
+                matchData->playerData[0].nametag = eventBackup.nametag;
+
+                // Update the player's rumble setting
+                int tagRumble = CSS_GetNametagRumble(0, matchData->playerData[0].nametag);
+                matchData->playerData[0].isRumble = tagRumble;
+            }
         }
-    }
-    // If isChooseCPU is false, copy the CPU from event data
-    else
-    {
-        cpuKind = eventMatchData->cpuKind;
-        cpuCostume = 0;
-        cpuCostume = 0;
-    }
 
-    // Check if CPU is using the same character and color as P1
-    if ((playerKind == cpuKind) && (playerCostume == cpuCostume))
-    {
-        // this doesnt account for if theyre both using the last costume
-        cpuCostume += 1;
-    }
+        // Determine the CPU
+        s32 cpu_kind;
+        s32 cpu_costume;
+        if (eventMatchData->cpuKind == -1) {
+            cpu_kind = preload->queued.fighters[1].kind;
+            cpu_costume = preload->queued.fighters[1].costume;
+        } else {
+            cpu_kind = eventMatchData->cpuKind;
+            cpu_costume = 0;
+        }
 
-    // Copy player data to match info struct (update their rumble setting 801bb1ec)
-    matchData->playerData[0].c_kind = playerKind;
-    matchData->playerData[0].costume = playerCostume;
-    matchData->playerData[0].p_kind = PKIND_HMN;
-    matchData->playerData[0].portNumberOverride = hmn_port;
+        if (cpu_kind != -1) {
+            matchData->playerData[1].costume = cpu_costume;
+            matchData->playerData[1].c_kind = cpu_kind;
+            matchData->playerData[1].p_kind = PKIND_CPU;
+            matchData->playerData[1].portNumberOverride = cpu_port;
+        }
 
-    // Copy CPU if they exist for this event
-    if (cpuKind != -1)
-    {
-        matchData->playerData[1].c_kind = cpuKind;
-        matchData->playerData[1].costume = cpuCostume;
-        matchData->playerData[1].p_kind = PKIND_CPU;
-        matchData->playerData[1].portNumberOverride = cpu_port;
-    }
+        matchData->playerData[0].c_kind = preload->queued.fighters[0].kind;
+        matchData->playerData[0].costume = preload->queued.fighters[0].costume;
+        matchData->playerData[0].p_kind = PKIND_HMN;
+        matchData->playerData[0].portNumberOverride = hmn_port;
 
-    // Determine the correct HUD position for this amount of players
-    int hudPos = 0;
-    for (int i = 0; i < 6; i++)
-    {
-        if (matchData->playerData[i].p_kind != PKIND_NONE)
-            hudPos++;
+        // Force Popo if required
+        if (event->force_sopo && matchData->playerData[0].c_kind == CKIND_ICECLIMBERS)
+            matchData->playerData[0].c_kind = CKIND_POPO;
+
+        // Determine the correct HUD position for this amount of players
+        int hudPos = 0;
+        for (int i = 0; i < 6; i++)
+        {
+            if (matchData->playerData[i].p_kind != PKIND_NONE)
+                hudPos++;
+        }
+        matchData->hudPos = hudPos;
+
     }
-    matchData->hudPos = hudPos;
 
     // Determine the Stage
-    int stage;
-    // If isSelectStage is true, use the selected stage
-    if (event->isSelectStage == true)
-    {
-        stage = preload->queued.stage;
-    }
-    // If isSelectStage is false, copy the stage from event data
-    else
-    {
-        stage = eventMatchData->stage;
-    }
-    // Update match struct with this stage
-    matchData->stage = stage;
-
-    //Update preload table? (801bb63c)
+    matchData->stage = event->isSelectStage ? preload->queued.stage : eventMatchData->stage;
 
     return;
 };
@@ -4445,10 +4397,10 @@ int GetPageNum()
     int pageNum = (sizeof(EventPages) / 4) - 1;
     return (pageNum);
 }
-u8 GetIsChooseCPU(int page, int event)
+u8 GetCSSType(int page, int event)
 {
     EventDesc *thisEvent = GetEventDesc(page, event);
-    return (thisEvent->isChooseCPU);
+    return (thisEvent->CSSType);
 }
 u8 GetIsSelectStage(int page, int event)
 {

@@ -20,20 +20,15 @@
     lwz r4, MemcardData(r13)
     lbz PageID, CurrentEventPage(r4)
 
+    # Set ko pointer
+    addi r4, r13, -0x4F70
+    stw r4, 0x4(REG_SceneData)
+
     # Get this events CSS Type
     mr r3, PageID
     mr r4, EventID
-    rtocbl r12, TM_GetIsChooseCPU
-    cmpwi r3, 0x0
-    beq EventCSS
-
-TrainingCSS:
-    li REG_CSSType, 0x17
-    b CheckToPreloadCPU
-
-EventCSS:
-    li REG_CSSType, 14
-    b CheckToPreloadCPU
+    rtocbl r12, TM_GetCSSType
+    mr REG_CSSType, r3
 
 CheckToPreloadCPU:
     # Check if this event has a pre-determined CPU

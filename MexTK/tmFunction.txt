@@ -8,7 +8,7 @@ GetTMVersShort
 GetTMVersLong
 GetTMCompile
 GetPageNum
-GetIsChooseCPU
+GetCSSType
 GetIsSelectStage
 GetFighter
 GetCPUFighter
