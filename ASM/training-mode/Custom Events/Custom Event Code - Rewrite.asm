@@ -746,6 +746,7 @@ MultishineThink:
     cmpwi r3, 0x0
     beq MultishineNotFirstFrame
     # Init Positions
+    bl StageGetGroundID_Main
     bl PlacePlayersCenterStage
 
 MultishineNotFirstFrame:
@@ -880,6 +881,7 @@ ReactionThink:
     cmpwi r3, 0x0
     beq ReactionNotFirstFrame
     # Init Positions
+    bl StageGetGroundID_Main
     bl PlacePlayersCenterStage
     # Savestate
     addi r3, EventData, EventData_SaveStateStruct
@@ -2144,9 +2146,11 @@ ReversalLoad:
     .set CPUAttack, (MenuData_OptionMenuMemory+0x2)+(0x0)
     .set P1FacingDirection, (MenuData_OptionMenuMemory+0x2)+(0x1)
     .set CPUFacingDirection, (MenuData_OptionMenuMemory+0x2)+(0x2)
+    .set Position, (MenuData_OptionMenuMemory+0x2)+(0x3)
     .set CPUAttackToggled, MenuData_OptionMenuToggled+(0x0)
     .set P1FacingDirectionToggled, MenuData_OptionMenuToggled+(0x1)
     .set CPUFacingDirectionToggled, MenuData_OptionMenuToggled+(0x2)
+    .set PositionToggled, MenuData_OptionMenuToggled+(0x3)
     .set AerialThinkStruct, 0x20
 
 ReversalThink:
@@ -2175,10 +2179,7 @@ ReversalThink:
     cmpwi r3, 0x0
     beq ReversalThinkMain
 
-    # bl Reversal_Floats
-    # mflr r3
-    # bl InitializePositions
-    # Move PLayers Center Stage
+    bl StageGetGroundID_Main
     bl PlacePlayersCenterStage
     # Clear Inputs
     bl RemoveFirstFrameInputs
@@ -2206,6 +2207,9 @@ ReversalThinkMain:
     lbz r3, CPUAttackToggled(MenuData)
     cmpwi r3, 0x0
     bne ReversalReset
+    lbz r3, PositionToggled(MenuData)
+    cmpwi r3, 0x0
+    bne ReversalRemakeSavestate
 
 ReversalSkipFacingReset:
     # Move Players Apart With DPad
@@ -2405,6 +2409,34 @@ ReversalGetupAttackBack:
 ReversalCheckToReset:
     cmpwi r20, 150                                      # Restore After 120 Frames
     blt ReversalThinkExit
+    b ReversalReset
+
+ReversalRemakeSavestate:
+    lbz r3, Position(MenuData)
+    cmpwi r3, 0
+    beq ReversalRemakeSavestate_MainStage
+
+    bl StageGetGroundID_Platform
+    cmpwi r3, 0x0FFF
+    blt ReversalRemakeSavestate_PlaceCharacters
+
+ReversalRemakeSavestate_MainStage:
+    bl StageGetGroundID_Main
+
+ReversalRemakeSavestate_PlaceCharacters:
+    bl PlacePlayersCenterStage
+    # Clear Inputs
+    bl RemoveFirstFrameInputs
+    # SaveState
+    addi r3, EventData, 0x10                            # SaveState start
+    li r4, 1                                            # Override failsafe code
+    bl SaveState_Save
+    # Set Frame 1 As Over
+    li r3, 0x1
+    stb r3, 0x0(r31)
+    # Set Timer to -60
+    li r3, -60
+    stw r3, 0x4(r31)
 
 ReversalReset:
 
@@ -2554,8 +2586,10 @@ Reversal_Floats:
     blrl
     .long 0xC0F9999A                                    # P1 X Position
     .long 0x40F9999A                                    # P2 X Position
-    .long 0x38d1b717                                    # FD Floor Y Coord
-    .long 0x38d1b717                                    # FD Floor Y Coord
+    .float 50.0
+    .float 50.0
+    #.long 0x38d1b717                                    # FD Floor Y Coord
+    #.long 0x38d1b717                                    # FD Floor Y Coord
 
 #################################
 
@@ -2648,7 +2682,8 @@ ReversalWindowInfo:
     blrl
 # amount of options, amount of options in each window
 
-    .long 0x020C0101                                    # 3 window, Smash Attack has 13 options, Facing Direction Has 2
+    .long 0x030C0101                                    # 3 window, Smash Attack has 13 options, Facing Direction Has 2
+    .long 0x01000000                                    # Position has 2
 
 ####################################################
 
@@ -2719,11 +2754,9 @@ ReversalWindowText:
 
     # Option 12 - Getup Attack (Stomach)
     .string "Getup Attack (Stomach)"
-    .align 2
 
     # Option 13 - Getup Attack (Back)
     .string "Getup Attack (Back)"
-    .align 2
 
 #########$$$#############
 ## P1 Facing Direction ##
@@ -2775,6 +2808,19 @@ ReversalWindowText:
     .long 0x00000000
     .long 0x00000000
 
+##############
+## Position ##
+##############
+
+    # Window Title
+    .string "Position"
+
+    # Options
+    .string "Ground"
+    .string "Platform"
+
+
+    .align 2
 ####################################################
 
 ReversalLoadExit:
@@ -3987,6 +4033,7 @@ AmsahTechThink:
     beq AmsahTechThinkMain
 
     # Move Players
+    bl StageGetGroundID_Main
     bl PlacePlayersCenterStage
     # P1 Has 120%
     li r3, 120
@@ -4404,6 +4451,7 @@ ComboTrainingThink:
     cmpwi r3, 0x0
     beq ComboTrainingThinkMain
 
+    bl StageGetGroundID_Main
     bl PlacePlayersCenterStage
     # Clear Inputs
     bl RemoveFirstFrameInputs
@@ -5285,7 +5333,27 @@ ComboTrainingThinkExit:
 
 #################################
 
-ComboTraining_StartingGroundIDs:
+StageGetGroundID_Main:
+    mflr r5
+    lwz r3, -0x6CB8(r13) # External Stage ID
+    bl StageGroundIDs_Main
+    mflr r4
+    mulli r3, r3, 0x2
+    lhzx r3, r3, r4
+    mtlr r5
+    blr
+
+StageGetGroundID_Platform:
+    mflr r5
+    lwz r3, -0x6CB8(r13) # External Stage ID
+    bl StageGroundIDs_Platform
+    mflr r4
+    mulli r3, r3, 0x2
+    lhzx r3, r3, r4
+    mtlr r5
+    blr
+
+StageGroundIDs_Main:
     blrl
     # Ground IDs to start on
     .long 0xFFFFFFFF                                    # Dummy, TEST
@@ -5305,6 +5373,27 @@ ComboTraining_StartingGroundIDs:
     .long 0x00040009                                    # Dream Land, Yoshis Island 64
     .long 0x000b0001                                    # Kongo Jungle 64, Battlefield
     .long 0x00010000                                    # Final Destination
+
+StageGroundIDs_Platform:
+    blrl
+    # Ground IDs to start on
+    .long 0xFFFFFFFF                                    # Dummy, TEST
+    .long 0x00020023                                    # FoD, Pokemon Stadium
+    .long 0xFFFFFFFF                                    # Peach's Castle, Kongo Jungle
+    .long 0xFFFFFFFF                                    # Brinstar, Corneria
+    .long 0x0004FFFF                                    # Yoshi's Story, Onett
+    .long 0xFFFFFFFF                                    # Mute City, Rainbow Cruise
+    .long 0xFFFFFFFF                                    # Jungle Japes, Great Bay
+    .long 0xFFFFFFFF                                    # Hyrule Temple, Brinstar Depths
+    .long 0xFFFFFFFF                                    # Yoshi's Island, Green Greens
+    .long 0xFFFFFFFF                                    # Fourside, MKI
+    .long 0xFFFFFFFF                                    # MKII, Akaneia
+    .long 0xFFFFFFFF                                    # Venom, PokeFloats
+    .long 0xFFFFFFFF                                    # Big Blue, Icicle Mountain
+    .long 0xFFFFFFFF                                    # Icetop, Flatzone
+    .long 0x0002FFFF                                    # Dream Land, Yoshis Island 64
+    .long 0xFFFF0003                                    # Kongo Jungle 64, Battlefield
+    .long 0xFFFFFFFF                                    # Final Destination
 
 #################################
 
@@ -13447,7 +13536,7 @@ GetGroundCenter:
 
 PlacePlayersCenterStage:
 # in
-# none
+# r3 - ground id
 
     backup
 
@@ -13457,8 +13546,10 @@ PlacePlayersCenterStage:
     .set playerdata, 25
     .set subchar, 24
     .set subchardata, 23
+    .set ground_id, 22
 
     li count, 0
+    mr ground_id, r3
 
 PlacePlayersCenterStage_Loop:
     # Get Player GObj
@@ -13516,12 +13607,7 @@ PlacePlayersCenterStage_DoStuff:
     mr r3, player
     branchl r12, 0x80068354
 
-    # Get Stage's Ground ID
-    lwz r3, -0x6CB8(r13)                                # External Stage ID
-    bl ComboTraining_StartingGroundIDs
-    mflr r4
-    mulli r3, r3, 0x2
-    lhzx r3, r3, r4
+    mr r3, ground_id
     bl GetGroundCenter
     fmr f30, f1
     fmr f31, f2
