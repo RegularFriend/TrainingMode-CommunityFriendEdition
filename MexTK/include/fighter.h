@@ -2095,7 +2095,7 @@ struct FighterData
         int x648;                             // 0x648
         int x64C;                             // 0x64C
         float trigger;                        // 0x650
-        int x654;                             // 0x654
+        float trigger_prev;                   // 0x654
         int x658;                             // 0x658
         int held;                             // 0x65C
         int held_prev;                        // 0x660
