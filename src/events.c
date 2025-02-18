@@ -2692,28 +2692,31 @@ void Message_Add(GOBJ *msg_gobj, int queue_num)
     if (queue_num >= MSGQUEUE_NUM)
         assert("queue_num over!");
 
-    // remove any existing messages of this kind
-    for (int i = 0; i < MSGQUEUE_SIZE; i++)
-    {
-        GOBJ *this_msg_gobj = msg_queue[i];
-
-        // if it exists
-        if (this_msg_gobj != 0)
+    // msg kind -1 always sticks around
+    if (msg_data->kind != -1) {
+        // remove any existing messages of this kind
+        for (int i = 0; i < MSGQUEUE_SIZE; i++)
         {
-            MsgData *this_msg_data = this_msg_gobj->userdata;
+            GOBJ *this_msg_gobj = msg_queue[i];
 
-            // Remove this message if its of the same kind
-            if ((this_msg_data->kind == msg_data->kind))
+            // if it exists
+            if (this_msg_gobj != 0)
             {
+                MsgData *this_msg_data = this_msg_gobj->userdata;
 
-                Message_Destroy(msg_queue, i); // remove the message and shift others
-
-                // if the message we're replacing is the most recent message, instantly
-                // remove the old one and do not animate the new one
-                if (i == 0)
+                // Remove this message if its of the same kind
+                if ((this_msg_data->kind == msg_data->kind))
                 {
-                    msg_data->state = MSGSTATE_WAIT;
-                    msg_data->anim_timer = 0;
+
+                    Message_Destroy(msg_queue, i); // remove the message and shift others
+
+                    // if the message we're replacing is the most recent message, instantly
+                    // remove the old one and do not animate the new one
+                    if (i == 0)
+                    {
+                        msg_data->state = MSGSTATE_WAIT;
+                        msg_data->anim_timer = 0;
+                    }
                 }
             }
         }

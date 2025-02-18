@@ -79,7 +79,12 @@ RedText:
     b PrintMessage
 
 PrintMessage:
-    li r3, 2                        # Message Kind
+    lwz r3, 0x195C(REG_FighterData)
+    lis r4, 0x3f80
+    cmpw r3, r4
+    bne Exit
+
+    li r3, -1                  # Message Kind
     lbz r4, 0xC(REG_FighterData)    # Message Queue
     mr r5, REG_TextColor
     bl SDI_String
