@@ -2236,7 +2236,7 @@ struct FighterData
         Vec2 ground_slope;             // 0x1900
         int x1908;                     // 0x1908
         void *random_sfx_table;        // 0x190c, contains a ptr to an sfx table when requesting a random sfx
-        int x1910;                     // 0x1910
+        int offscreen_damage_timer;    // 0x1910, counts up to 60, then player takes 1 percent
         int x1914;                     // 0x1914
         struct                         // aka clank
         {                              //
