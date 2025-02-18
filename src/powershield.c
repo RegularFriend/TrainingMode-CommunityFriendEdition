@@ -2,10 +2,12 @@
 #include "events.h"
 
 void Exit(int value);
+void ChangeDirection(GOBJ *event_menu, int value);
 
 enum menu_options {
     OPT_FIRE_SPEED,
     OPT_LASER_HEIGHT,
+    OPT_DIRECTION,
 };
 
 enum fire_speed {
@@ -24,6 +26,7 @@ enum laser_height {
 
 static char *Options_FireSpeed[] = { "Random", "Slow", "Medium", "Fast" };
 static char *Options_LaserHeight[] = { "Random", "Low", "Mid", "High" };
+static char *Options_Direction[] = { "Right", "Left" };
 
 static EventOption Options_Main[] = {
     {
@@ -39,6 +42,14 @@ static EventOption Options_Main[] = {
         .option_name = "Laser Height",
         .desc = "Change the laser height.",
         .option_values = Options_LaserHeight,
+    },
+    {
+        .option_kind = OPTKIND_STRING,
+        .value_num = sizeof(Options_Direction) / 4,
+        .option_name = "Direction",
+        .desc = "Change which way falco shoots a laser.",
+        .option_values = Options_Direction,
+        .onOptionChange = ChangeDirection,
     },
     {
         .option_kind = OPTKIND_FUNC,
@@ -141,6 +152,14 @@ void Exit(int value) {
     Match *match = MATCH;
     match->state = 3;
     Match_EndVS();
+}
+
+void ChangeDirection(GOBJ *event_menu, int value) {
+    GOBJ *falco = Fighter_GetGObj(1);
+    FighterData *falco_data = falco->userdata;
+
+    falco_data->facing_direction *= -1.f;
+    falco_data->phys.pos.X *= -1.f;
 }
 
 EventMenu *Event_Menu = &Menu_Main;
