@@ -2,7 +2,7 @@
 static char nullString[] = " ";
 
 static GXColor tmgbar_black = {40, 40, 40, 255};
-static GXColor tmgbar_grey = {80, 80, 80, 255};
+static GXColor tmgbar_grey = {120, 120, 120, 255};
 static GXColor tmgbar_blue = {128, 128, 255, 255};
 static GXColor tmgbar_green = {128, 255, 128, 255};
 static GXColor tmgbar_yellow = {255, 255, 128, 255};
@@ -17,6 +17,7 @@ static GXColor *tmgbar_colors[] = {
     &tmgbar_indigo,
     &tmgbar_white,
     &tmgbar_red,
+    &tmgbar_blue,
 };
 
 enum menu_options
@@ -386,11 +387,19 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
             event_data->action_state.action_log[curr_frame] = LDACT_ATTACK;
     }
     // look for land
-    else if (((hmn_data->state_id == ASID_LANDING) || (hmn_data->state_id == ASID_LANDINGFALLSPECIAL)) || ((hmn_data->state_id == ASID_WAIT) && (hmn_data->TM.state_frame == 0) && ((hmn_data->TM.state_prev != ASID_LANDING) || (hmn_data->TM.state_prev != ASID_LANDINGFALLSPECIAL)))) // this is first frame of a no impact land
-    {
+    else if (
+        hmn_data->state_id == ASID_LANDING
+        || hmn_data->state_id == ASID_LANDINGFALLSPECIAL
+    ) {
         event_data->action_state.is_land = 1;
         if (hud_updating)
             event_data->action_state.action_log[curr_frame] = LDACT_LANDING;
+    } else if (ASID_CLIFFCLIMBSLOW <= hmn_data->state_id && hmn_data->state_id <= ASID_CLIFFJUMPQUICK2) {
+        if (hud_updating)
+            event_data->action_state.action_log[curr_frame] = LDACT_NONE;
+    } else {
+        if (hud_updating)
+            event_data->action_state.action_log[curr_frame] = LDACT_GALINT;
     }
 
     // grab airdodge angle
@@ -418,8 +427,8 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
             && hmn_data->TM.state_frame + 1 >= hmn_data->attr.normal_landing_lag;
 
         // if actionable after airdodge landing
-        ledgedash_finished |= hmn_data->state_id == ASID_LANDINGFALLSPECIAL
-            && hmn_data->TM.state_frame == 9;
+        ledgedash_finished |= hmn_data->TM.state_prev[0] == ASID_LANDINGFALLSPECIAL
+            || hmn_data->TM.state_prev[1] == ASID_LANDINGFALLSPECIAL;
 
         // if entered wait without entering landing - probably from NIL
         ledgedash_finished |= hmn_data->state_id == ASID_WAIT;
@@ -469,41 +478,36 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         JOBJ_ReqAnimAll(hud_jobj, 0);
     }
 
-    if (event_data->action_state.is_actionable == 0) {
-        // update bar colors
-        JOBJ *timingbar_jobj;
-        JOBJ_GetChild(hud_jobj, &timingbar_jobj, LCLJOBJ_BAR, -1); // get timing bar jobj
-        DOBJ *d = timingbar_jobj->dobj;
-        int count = 0;
-        while (d != 0)
+    // update bar colors
+    JOBJ *timingbar_jobj;
+    JOBJ_GetChild(hud_jobj, &timingbar_jobj, LCLJOBJ_BAR, -1); // get timing bar jobj
+    DOBJ *d = timingbar_jobj->dobj;
+    int count = 0;
+    while (d != 0)
+    {
+        // if a box dobj
+        if ((count >= 0) && (count < 30))
         {
-            // if a box dobj
-            if ((count >= 0) && (count < 30))
+
+            // if mobj exists (it will)
+            MOBJ *m = d->mobj;
+            if (m != 0)
             {
 
-                // if mobj exists (it will)
-                MOBJ *m = d->mobj;
-                if (m != 0)
-                {
+                HSD_Material *mat = m->mat;
+                int this_frame = 29 - count;
+                GXColor *bar_color;
 
-                    HSD_Material *mat = m->mat;
-                    int this_frame = 29 - count;
-                    GXColor *bar_color;
+                // check if GALINT frame
+                bar_color = tmgbar_colors[event_data->action_state.action_log[this_frame]];
 
-                    // check if GALINT frame
-                    if (curr_frame < this_frame && this_frame <= curr_frame + hmn_data->hurt.intang_frames.ledge)
-                        bar_color = &tmgbar_blue;
-                    else
-                        bar_color = tmgbar_colors[event_data->action_state.action_log[this_frame]];
-
-                    mat->diffuse = *bar_color;
-                }
+                mat->diffuse = *bar_color;
             }
-
-            // inc
-            count++;
-            d = d->next;
         }
+
+        // inc
+        count++;
+        d = d->next;
     }
 
     // update HUD anim
