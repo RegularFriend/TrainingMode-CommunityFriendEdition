@@ -1138,7 +1138,7 @@ void EventInit(int page, int eventID, MatchInit *matchData)
         // Determine the CPU
         s32 cpu_kind;
         s32 cpu_costume;
-        if (eventMatchData->cpuKind == -1) {
+        if (eventMatchData->cpuKind == -1 && event->CSSType == SLCHRKIND_TRAINING) {
             cpu_kind = preload->queued.fighters[1].kind;
             cpu_costume = preload->queued.fighters[1].costume;
         } else {
