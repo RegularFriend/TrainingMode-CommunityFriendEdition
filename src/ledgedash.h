@@ -78,6 +78,7 @@ typedef enum LDSH_ACTION
     LDACT_AIRDODGE,
     LDACT_ATTACK,
     LDACT_LANDING,
+    LDACT_GALINT,
 };
 
 void Event_Exit();
