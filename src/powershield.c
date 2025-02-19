@@ -70,11 +70,14 @@ static int falco_shoot_delay = -1;
 static int falco_fastfall_delay = -1;
 
 void Event_Think(GOBJ *menu) {
+    GOBJ *player = Fighter_GetGObj(0);
+    FighterData *player_data = player->userdata;
     GOBJ *falco = Fighter_GetGObj(1);
     FighterData *falco_data = falco->userdata;
 
     Fighter_ZeroCPUInputs(falco_data);
     falco_data->flags.no_reaction_always = true;
+    player_data->shield.health = 60;
 
     int state = falco_data->state_id;
     int state_frame = falco_data->TM.state_frame;
