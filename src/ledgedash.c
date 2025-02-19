@@ -356,7 +356,8 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
     // look for cliffwait
     if (hmn_data->state_id == ASID_CLIFFWAIT)
     {
-        event_data->action_state.action_log[curr_frame] = LDACT_CLIFFWAIT;
+        if (hud_updating)
+            event_data->action_state.action_log[curr_frame] = LDACT_CLIFFWAIT;
     }
     // look for release
     else if (hmn_data->state_id == ASID_FALL)
