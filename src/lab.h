@@ -2064,7 +2064,7 @@ static EventMenu LabMenu_SlotChancesHMN = {
 };
 
 static EventMenu LabMenu_SlotChancesCPU = {
-    .name = "HMN Playback Slot Chances",
+    .name = "CPU Playback Slot Chances",
     .option_num = sizeof(LabOptions_SlotChancesCPU) / sizeof(EventOption),
     .options = &LabOptions_SlotChancesCPU,
     .shortcuts = &Lab_ShortcutList,
