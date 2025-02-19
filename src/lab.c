@@ -2283,8 +2283,13 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
             goto CPULOGIC_NONE;
         } else {
             eventData->cpu_countering = true;
-            if (Lab_CPUPerformAction(cpu, action_id, hmn))
-                eventData->cpu_state = CPUSTATE_RECOVER;
+            if (Lab_CPUPerformAction(cpu, action_id, hmn)) {
+                CPUAction *action = Lab_CPUActions[action_id];
+                if (action->noActAfter)
+                    eventData->cpu_state = CPUSTATE_NONE;
+                else
+                    eventData->cpu_state = CPUSTATE_RECOVER;
+            }
         }
 
         break;
