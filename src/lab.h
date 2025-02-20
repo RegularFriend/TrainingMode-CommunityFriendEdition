@@ -36,6 +36,7 @@ typedef struct CPUAction {
     unsigned char isLast        : 1; // flag to indicate this was the final input
     unsigned char stickDir      : 3; // 0 = none, 1 = towards opponent, 2 = away from opponent, 3 = forward, 4 = backward
     unsigned char recSlot       : 3; // 0 = none, 1 = slot 1, ..., 6 = slot 6
+    unsigned char noActAfter    : 1; // 0 = goto CPUSTATE_RECOVER, 1 = goto CPUSTATE_NONE
     bool (*custom_check)(GOBJ *);
 } CPUAction;
 
@@ -479,9 +480,10 @@ static CPUAction Lab_CPUActionAirdodge[] = {
 };
 static CPUAction Lab_CPUActionFFTumble[] = {
     {
-        .state     = ASID_DAMAGEAIR,
-        .stickY    = -127,
-        .isLast    = 1,
+        .state      = ASID_DAMAGEAIR,
+        .stickY     = -127,
+        .isLast     = 1,
+        .noActAfter = 1,
     },
     -1,
 };
@@ -2064,7 +2066,7 @@ static EventMenu LabMenu_SlotChancesHMN = {
 };
 
 static EventMenu LabMenu_SlotChancesCPU = {
-    .name = "HMN Playback Slot Chances",
+    .name = "CPU Playback Slot Chances",
     .option_num = sizeof(LabOptions_SlotChancesCPU) / sizeof(EventOption),
     .options = &LabOptions_SlotChancesCPU,
     .shortcuts = &Lab_ShortcutList,
