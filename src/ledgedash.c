@@ -43,6 +43,14 @@ enum reset_mode
     OPTRESET_RANDOM,
 };
 
+enum reset_pos
+{
+    OPTPOS_LEDGE,
+    OPTPOS_FALLING,
+    OPTPOS_STAGE,
+    OPTPOS_RESPAWNPLAT,
+};
+
 // Main Menu
 static char **LdshOptions_CamMode[] = {"Normal", "Zoom", "Fixed", "Advanced"};
 static char **LdshOptions_Start[] = {"Ledge", "Falling", "Stage", "Respawn Platform"};
@@ -351,62 +359,55 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
     }
 
     int curr_frame = event_data->action_state.timer++;
-    int hud_updating = curr_frame < (sizeof(event_data->action_state.action_log) / sizeof(u8));
+    int hud_updating =
+        curr_frame < (sizeof(event_data->action_state.action_log) / sizeof(u8))
+        && hmn_data->hurt.intang_frames.ledge != 0;
 
-    // look for cliffwait
-    if (hmn_data->state_id == ASID_CLIFFWAIT)
-    {
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_CLIFFWAIT;
-    }
-    // look for release
-    else if (hmn_data->state_id == ASID_FALL)
-    {
-        event_data->action_state.is_release = 1;
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_FALL;
-    }
-    // look for jump
-    else if ((hmn_data->state_id == ASID_JUMPAERIALF) || (hmn_data->state_id == ASID_JUMPAERIALB) ||
-             (((hmn_data->kind == 4) || (hmn_data->kind == 15)) && ((hmn_data->state_id >= 341) && (hmn_data->state_id <= 345)))) // check for kirby and jiggs jump
-    {
-        event_data->action_state.is_jump = 1;
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_JUMP;
-    }
-    // look for airdodge
-    else if (hmn_data->state_id == ASID_ESCAPEAIR)
-    {
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_AIRDODGE;
-    }
-    // look for aerial
-    else if (hmn_data->atk_kind != 1)
-    {
-        event_data->action_state.is_aerial = 1;
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_ATTACK;
-    }
-    // look for land
-    else if (
-        hmn_data->state_id == ASID_LANDING
-        || hmn_data->state_id == ASID_LANDINGFALLSPECIAL
-    ) {
-        event_data->action_state.is_land = 1;
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_LANDING;
-    } else if (ASID_CLIFFCLIMBSLOW <= hmn_data->state_id && hmn_data->state_id <= ASID_CLIFFJUMPQUICK2) {
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_NONE;
-    } else {
-        if (hud_updating)
-            event_data->action_state.action_log[curr_frame] = LDACT_GALINT;
+    if (hud_updating) {
+        int state_id = hmn_data->state_id;
+        int action = LDACT_GALINT;
+
+        // look for cliffwait
+        if (state_id == ASID_CLIFFWAIT)
+             action = LDACT_CLIFFWAIT;
+
+        // look for release
+        else if (state_id == ASID_FALL)
+            action = LDACT_FALL;
+
+        // look for jump
+        else if (
+            state_id == ASID_JUMPAERIALF
+            || state_id == ASID_JUMPAERIALB
+            // check for kirby and jiggs jump
+            || ((hmn_data->kind == 4 || hmn_data->kind == 15) && (state_id >= 341 && state_id <= 345)))
+            action = LDACT_JUMP;
+
+        // look for airdodge
+        else if (state_id == ASID_ESCAPEAIR)
+            action = LDACT_AIRDODGE;
+
+        // look for attack
+        else if (hmn_data->atk_kind != 1)
+            action = LDACT_ATTACK;
+
+        // look for landing
+        else if (
+            (state_id == ASID_LANDING && hmn_data->TM.state_frame < hmn_data->attr.normal_landing_lag)
+            || state_id == ASID_LANDINGFALLSPECIAL
+        )
+            action = LDACT_LANDING;
+
+        // look for ledge options
+        else if (ASID_CLIFFCLIMBSLOW <= state_id && state_id <= ASID_CLIFFJUMPQUICK2)
+            action = LDACT_NONE;
+
+        event_data->action_state.action_log[curr_frame] = action;
     }
 
     // grab airdodge angle
     if (event_data->action_state.is_airdodge == 0)
     {
-
         if ((hmn_data->state_id == ASID_ESCAPEAIR) || (hmn_data->TM.state_prev[0] == ASID_ESCAPEAIR))
         {
             // determine airdodge angle
@@ -418,26 +419,34 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         }
     }
 
-    int released_ledge = event_data->action_state.is_release == 1;
-    int not_yet_actionable = event_data->action_state.is_actionable == 0;
+    if (hmn_data->state_id == ASID_CLIFFWAIT)
+        event_data->action_state.is_ledgegrab = 1;
+    if (event_data->action_state.is_ledgegrab && hmn_data->state_id == ASID_FALL)
+        event_data->action_state.is_release = 1;
 
-    int ledgedash_finished = false;
-    if (not_yet_actionable && released_ledge) {
+    int released_ledge = event_data->action_state.is_release == 1;
+    int not_finished = event_data->action_state.is_finished == 0;
+    int just_finished = false;
+    if (not_finished && released_ledge) {
         // if actionable after normal landing
-        ledgedash_finished |= hmn_data->state_id == ASID_LANDING
-            && hmn_data->TM.state_frame + 1 >= hmn_data->attr.normal_landing_lag;
+        just_finished |= hmn_data->state_id == ASID_LANDING
+            && hmn_data->TM.state_frame >= hmn_data->attr.normal_landing_lag;
+
+        // if actionable after normal landing, but performed an action immediately after
+        just_finished |= hmn_data->TM.state_prev[0] == ASID_LANDING
+            || hmn_data->TM.state_prev[1] == ASID_LANDING;
 
         // if actionable after airdodge landing
-        ledgedash_finished |= hmn_data->TM.state_prev[0] == ASID_LANDINGFALLSPECIAL
+        just_finished |= hmn_data->TM.state_prev[0] == ASID_LANDINGFALLSPECIAL
             || hmn_data->TM.state_prev[1] == ASID_LANDINGFALLSPECIAL;
 
         // if entered wait without entering landing - probably from NIL
-        ledgedash_finished |= hmn_data->state_id == ASID_WAIT;
+        just_finished |= hmn_data->state_id == ASID_WAIT;
+
+        event_data->action_state.is_finished |= just_finished;
     }
 
-    if (ledgedash_finished) {
-        event_data->action_state.is_actionable = 1;
-
+    if (just_finished) {
         // destroy any tips
         event_vars->Tip_Destroy();
 
@@ -560,7 +569,7 @@ void Ledgedash_ResetThink(LedgedashData *event_data, GOBJ *hmn)
             event_data->ledge = -event_data->ledge;
 
         Fighter_PlaceOnLedge();
-    } else if (event_data->action_state.is_actionable) {
+    } else if (event_data->action_state.is_finished) {
         event_data->reset_timer = 60;
         if (event_data->was_successful)
             SFX_Play(303);
@@ -591,12 +600,10 @@ void Ledgedash_ResetThink(LedgedashData *event_data, GOBJ *hmn)
 void Ledgedash_InitVariables(LedgedashData *event_data)
 {
     event_data->action_state.timer = 0;
+    event_data->action_state.is_ledgegrab = 0;
     event_data->action_state.is_release = 0;
-    event_data->action_state.is_jump = 0;
     event_data->action_state.is_airdodge = 0;
-    event_data->action_state.is_aerial = 0;
-    event_data->action_state.is_land = 0;
-    event_data->action_state.is_actionable = 0;
+    event_data->action_state.is_finished = 0;
 
     // init action log
     for (int i = 0; i < sizeof(event_data->action_state.action_log) / sizeof(u8); i++)
@@ -651,7 +658,7 @@ void Ledgedash_HitLogThink(LedgedashData *event_data, GOBJ *hmn)
     LdshHitlogData *hitlog_data = event_data->hitlog_gobj->userdata;
 
     // log hitboxes
-    if ((event_data->action_state.is_actionable == 1) && (hmn_data->hurt.intang_frames.ledge > 0))
+    if (event_data->action_state.is_finished && hmn_data->hurt.intang_frames.ledge > 0)
     {
 
         // iterate through fighter hitboxes
@@ -1063,9 +1070,9 @@ void Fighter_PlaceOnLedge(void)
     hmn_data->facing_direction = ledge_dir;
 
     // check starting position
-    switch  (LdshMenu_Main.options[0].option_val)
+    switch (LdshOptions_Main[OPT_POS].option_val)
     {
-    case 0:
+    case OPTPOS_LEDGE:
     {
         // place player on this ledge
         event_data->tip.refresh_num = -1; // setting this to -1 because the per frame code will add 1 and make it 0
@@ -1084,7 +1091,7 @@ void Fighter_PlaceOnLedge(void)
         Fighter_ApplyIntang(hmn, ftcommon->cliff_invuln_time+1);
         break;
     }
-    case 1:
+    case OPTPOS_FALLING:
     {
         // place player falling above the ledge
         hmn_data->phys.pos.X = ledge_pos.X + -5 * ledge_dir; // slight nudge to prevent accidentally landing on stage
@@ -1093,7 +1100,7 @@ void Fighter_PlaceOnLedge(void)
         Fighter_EnterFall(hmn);
         break;
     }
-    case 2:
+    case OPTPOS_STAGE:
     {
         // place player on stage next to ledge
         Vec3 coll_pos, line_unk;
@@ -1110,7 +1117,7 @@ void Fighter_PlaceOnLedge(void)
         }
         break;
     }
-    case 3:
+    case OPTPOS_RESPAWNPLAT:
     {
         // place player in a random position in respawn wait
         float xpos_min = 40;
@@ -1367,7 +1374,7 @@ void Tips_Think(LedgedashData *event_data, FighterData *hmn_data)
     }
 
     // check for ledgedash without refreshing
-    if (!event_data->tip.refresh_displayed && event_data->action_state.is_actionable && event_data->tip.refresh_num == 0)
+    if (!event_data->tip.refresh_displayed && event_data->action_state.is_finished && event_data->tip.refresh_num == 0)
     {
 
         event_data->tip.refresh_displayed = 1;
