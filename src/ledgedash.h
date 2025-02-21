@@ -32,12 +32,10 @@ struct LedgedashData
     struct
     {
         int timer;
+        u8 is_ledgegrab : 1;
         u8 is_release : 1;
-        u8 is_jump : 1;
         u8 is_airdodge : 1;
-        u8 is_aerial : 1;
-        u8 is_land : 1;
-        u8 is_actionable : 1;
+        u8 is_finished : 1;
         u8 action_log[30];
     } action_state;
     struct
