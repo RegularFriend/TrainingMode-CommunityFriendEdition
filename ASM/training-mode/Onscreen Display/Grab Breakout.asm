@@ -26,40 +26,49 @@
     bl Data
     .float 0.5
     .float 1.0
-    .long 0    # initial grab timer
-    .long 0    # frame counter for grab
+    .long 0    # 0x8  initial grab timer
+    .long 0    # 0xC  frame counter for grab
+    .long 0    # 0x10 global frame counter - used to detect new grabs
 Data:
     mflr r3
 
-    lfs f0, 0x1A4C (playerdata)
+    # If this run is not 1f later than last run, then it's a new grab.
+    # Doesn't work for simultaneous grabs in doubles, oh well.
+CheckNewGrab:
+    # r5 = stc_match->time_frames
+    lis r5, 0x8046
+    ori r5, r5, 0xb6a0
+    lwz r5, 0x24(r5)
 
-    lfs f1, 0x8(r3)
-    fcmpo cr0, f0, f1
-    ble GrabUpdate
+    lwz r4, 0x10(r3)
+    stw r5, 0x10(r3)
+    addi r4, r4, 1
+    cmpw r4, r5
+
+    beq GrabUpdate
 
 NewGrab:
+    # initial_grab_timer = data->grab.grab_timer
+    lfs f0, 0x1A4C (playerdata)
     stfs f0, 0x8(r3)
     li r4, 0
     stw r4, 0xC(r3)
 
 GrabUpdate:
-    # increment frame counter
+    # frame_counter += 1.f
     lfs f1, 0xC(r3)
     lfs f2, 0x4(r3)
     fadds f1, f1, f2
     stfs f1, 0xC(r3)
 
-    # calculate rounded timer
-    # We show the timer as an integer, rounded up, because the fractional part never changes and isn't important.
-    # Instead of messing with rounding modes or converting to an integer, 
-    # we simply add 0.5 then let c formatting do the rounding.
-    lfs f2, 0x0(r3)
-    fadds f1, f0, f2
+    # grab_timer = data->grab.grab_timer
+    lfs f1, 0x1A4C (playerdata)
 
     # calculate mash rate
+    # mash_rate = (initial_grab_timer - grab_timer) / frame_counter
     lfs f2, 0x8(r3)
     lfs f3, 0xC(r3)
-    fsubs f2, f2, f0
+    fsubs f2, f2, f1
     fdivs f2, f2, f3
 
     li r3, OSD.GrabBreakout
