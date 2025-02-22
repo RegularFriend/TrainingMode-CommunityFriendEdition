@@ -30,7 +30,7 @@
     cmpwi r3, 0xE
     bne Exit
 
-    # Make Sure Player Didn't Buffer Crouch, Shield, or Walk
+    # Make Sure Player Didn't Buffer Crouch, Shield, Walk, or Turn
     lwz r3, 0x10(playerdata)
     cmpwi r3, 0xF
     beq Exit
@@ -41,6 +41,8 @@
     cmpwi r3, 0x27
     beq Exit
     cmpwi r3, 0xB2
+    beq Exit
+    cmpwi r3, 0x12
     beq Exit
     cmpwi r3, ASID_SquatWait
     beq Exit
