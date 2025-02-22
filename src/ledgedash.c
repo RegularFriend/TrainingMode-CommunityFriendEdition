@@ -411,7 +411,7 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         if ((hmn_data->state_id == ASID_ESCAPEAIR) || (hmn_data->TM.state_prev[0] == ASID_ESCAPEAIR))
         {
             // determine airdodge angle
-            float angle = atan2(hmn_data->input.lstick.Y, hmn_data->input.lstick.X) - -(M_PI / 2);
+            float angle = atan2(fabs(hmn_data->input.lstick.Y), fabs(hmn_data->input.lstick.X));
 
             // save airdodge angle
             event_data->hud.airdodge_angle = angle;
