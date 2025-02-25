@@ -46,7 +46,7 @@ The `.asm` files will be injected and run, while the `.s` files contain include 
 
 ## Melee Stuff
 
-### Dat Files
+### HSDRaw and Dat Files
 
 [A dat file, or an HSD_Archive](https://github.com/doldecomp/melee/blob/master/src/sysdolphin/baselib/archive.c) is the file format for data in ssbm.
 Everything is stored in dat files - models, animations, code, textures, etc. Only cutscenes and music are stored differently.
