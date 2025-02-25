@@ -74,7 +74,7 @@ You'll need to right click on the node -> Open As -> JOBJ in HSDRaw in order to 
 - **TOBJ** - texture object. Images that will be displayed on a mesh.
 - **POBJ** - polygon object. Contains a mesh.
 
-## Common Stuff
+## How To Do Things
 
 - If you want to alter an event written in C (easy):
     - The training lab, lcancel, ledgedash, wavedash, and powershield events are written in c.
@@ -95,7 +95,7 @@ You'll need to right click on the node -> Open As -> JOBJ in HSDRaw in order to 
     - Implement the `Event_Init`, `Event_Update`, `Event_Think` methods and `Event_Menu` pointer in your c file. Poke around the other events to figure out how the data flows.
     - Also, increment the event index for each legacy event on that page so they are pushed down in the menu.
 
-## Debugging tips
+## Debugging Tips
 - Due to a deficiency in the MexTK headers, we cannot turn on warnings effectively, so be aware of that.
 - Set `TM_DEBUG` to 2 in events.h to get OSReport statements on the screen.
 - **Use the dolphin debugger!** Make sure you have the latest version of dolphin for debugging.
