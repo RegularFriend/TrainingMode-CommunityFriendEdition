@@ -50,7 +50,8 @@ The `.asm` files will be injected and run, while the `.s` files contain include 
 
 [A dat file, or an HSD_Archive](https://github.com/doldecomp/melee/blob/master/src/sysdolphin/baselib/archive.c) is the file format for data in ssbm.
 Everything is stored in dat files - models, animations, code, textures, etc. Only cutscenes and music are stored differently.
-You can open, view, and edit dat files with [HSDRawViewer](https://github.com/Ploaj/HSDLib).
+
+[You can open, view, and edit dat files with HSDRawViewer](https://github.com/Ploaj/HSDLib).
 
 The `dat/` directory contains some of these files.
 They contain event specific objects, mostly menu models with some random other data.
