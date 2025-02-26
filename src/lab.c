@@ -5842,20 +5842,53 @@ void Event_Init(GOBJ *gobj)
 
     // saved options
     Memcard *memcard = R13_PTR(MEMCARD);
-    LabOptions_General[OPTGEN_FRAMEBTN].option_val = memcard->TM_LabFrameAdvanceButton;
-    LabOptions_General[OPTGEN_INPUT].option_val = memcard->TM_LabCPUInputDisplay;
-    LabOptions_General[OPTGEN_TAUNT].option_val = memcard->TM_LabTauntEnabled;
 
+    // load input display option, resetting if invalid
+    if (memcard->TM_LabFrameAdvanceButton < LabOptions_General[OPTGEN_FRAMEBTN].value_num)
+        LabOptions_General[OPTGEN_FRAMEBTN].option_val = memcard->TM_LabFrameAdvanceButton;
+    else
+        memcard->TM_LabFrameAdvanceButton = LabOptions_General[OPTGEN_FRAMEBTN].option_val;
+
+    // load input display option, resetting if invalid
+    if (memcard->TM_LabCPUInputDisplay < LabOptions_General[OPTGEN_INPUT].value_num)
+        LabOptions_General[OPTGEN_INPUT].option_val = memcard->TM_LabCPUInputDisplay;
+    else
+        memcard->TM_LabCPUInputDisplay = LabOptions_General[OPTGEN_INPUT].option_val;
+
+    // load taunt option, resetting if invalid
+    if (memcard->TM_LabTauntEnabled < LabOptions_General[OPTGEN_TAUNT].value_num)
+        LabOptions_General[OPTGEN_TAUNT].option_val = memcard->TM_LabTauntEnabled;
+    else
+        memcard->TM_LabTauntEnabled = LabOptions_General[OPTGEN_TAUNT].option_val;
+
+    // load overlays, resetting if invalid
     int overlay_save_count = sizeof(memcard->TM_LabSavedOverlays_HMN) / sizeof(OverlaySave);
     for (int i = 0; i < overlay_save_count; ++i) {
         OverlaySave save_hmn = memcard->TM_LabSavedOverlays_HMN[i];
+        if (save_hmn.overlay != 0) {
+            // ensure valid
+            if (
+                save_hmn.group < ARRAY_LEN(LabOptions_OverlaysHMN)
+                && save_hmn.overlay < ARRAY_LEN(LabValues_OverlayColours)
+            ) {
+                LabOptions_OverlaysHMN[save_hmn.group].option_val = save_hmn.overlay;
+            } else {
+                memcard->TM_LabSavedOverlays_HMN[i] = (OverlaySave){0};
+            }
+        }
+
         OverlaySave save_cpu = memcard->TM_LabSavedOverlays_CPU[i];
-
-        if (save_hmn.overlay != 0)
-            LabOptions_OverlaysHMN[save_hmn.group].option_val = save_hmn.overlay;
-
-        if (save_cpu.overlay != 0)
-            LabOptions_OverlaysCPU[save_cpu.group].option_val = save_cpu.overlay;
+        if (save_cpu.overlay != 0) {
+            // ensure valid
+            if (
+                save_cpu.group < ARRAY_LEN(LabOptions_OverlaysCPU)
+                && save_cpu.overlay < ARRAY_LEN(LabValues_OverlayColours)
+            ) {
+                LabOptions_OverlaysCPU[save_cpu.group].option_val = save_cpu.overlay;
+            } else {
+                memcard->TM_LabSavedOverlays_CPU[i] = (OverlaySave){0};
+            }
+        }
     }
 
     // stage options
