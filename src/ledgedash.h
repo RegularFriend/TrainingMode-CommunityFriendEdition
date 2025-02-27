@@ -91,3 +91,5 @@ void Ledgedash_HitLogGX(GOBJ *gobj, int pass);
 void RebirthWait_Phys(GOBJ *fighter);
 int RebirthWait_IASA(GOBJ *fighter);
 int Ledge_Find(int search_dir, float xpos_start, float *ledge_dir);
+int Update_CheckPause(void);
+int Update_CheckAdvance(void);

@@ -135,10 +135,33 @@ static EventOption LdshOptions_Main[] = {
         .onOptionSelect = Event_Exit,
     },
 };
+
+static char **LdshOptions_FrameAdvance[] = {"Off", "On"};
+static EventOption Ldsh_FrameAdvance = {
+    .option_kind = OPTKIND_STRING,
+    .value_num = sizeof(LdshOptions_FrameAdvance) / 4,
+    .option_name = "Frame Advance",
+    .desc = "Enable frame advance. Press to advance one\nframe. Hold to advance at normal speed.",
+    .option_values = LdshOptions_FrameAdvance,
+};
+
+static Shortcut Ldsh_Shortcuts[] = {
+    {
+        .buttons_mask = HSD_BUTTON_A,
+        .option = &Ldsh_FrameAdvance,
+    }
+};
+
+static ShortcutList Ldsh_ShortcutList = {
+    .count = ARRAY_LEN(Ldsh_Shortcuts),
+    .list = Ldsh_Shortcuts,
+};
+
 static EventMenu LdshMenu_Main = {
     .name = "Ledgedash Training",
     .option_num = sizeof(LdshOptions_Main) / sizeof(EventOption),
     .options = &LdshOptions_Main,
+    .shortcuts = &Ldsh_ShortcutList,
 };
 
 // Init Function
@@ -151,6 +174,10 @@ void Event_Init(GOBJ *gobj)
 
     // get assets
     event_data->assets = Archive_GetPublicAddress(event_vars->event_archive, "ledgedash");
+
+    HSD_Update *hsd_update = stc_hsd_update;
+    hsd_update->checkPause = Update_CheckPause;
+    hsd_update->checkAdvance = Update_CheckAdvance;
 
     // standardize camera
     Stage *stage = stc_stage;
@@ -1390,6 +1417,99 @@ void Tips_Think(LedgedashData *event_data, FighterData *hmn_data)
                 event_data->tip.refresh_cond_num = 0;
         }
     }
+}
+
+int Update_CheckPause(void)
+{
+    HSD_Update *update = stc_hsd_update;
+    int isChange = 0;
+
+    GOBJ *hmn = Fighter_GetGObj(0);
+    FighterData *hmn_data = hmn->userdata;
+
+    // get their pad
+    HSD_Pad *pad = PadGet(hmn_data->pad_index, PADGET_MASTER);
+
+    // menu paused
+    if (Ldsh_FrameAdvance.option_val == 1)
+    {
+        // check if unpaused
+        if (update->pause_kind != PAUSEKIND_SYS)
+            isChange = 1;
+    }
+    // menu unpaused
+    else
+    {
+        // check if paused
+        if (update->pause_kind == PAUSEKIND_SYS)
+            isChange = 1;
+    }
+
+    return isChange;
+}
+int Update_CheckAdvance(void)
+{
+    static int timer = 0;
+
+    HSD_Update *update = stc_hsd_update;
+    int isAdvance = 0;
+
+    GOBJ *hmn = Fighter_GetGObj(0);
+    FighterData *hmn_data = hmn->userdata;
+    int controller = hmn_data->pad_index;
+
+    // get their pad
+    HSD_Pad *pad = PadGet(controller, PADGET_MASTER);
+    HSD_Pad *engine_pad = PadGet(controller, PADGET_ENGINE);
+
+    // get their advance input
+    static int stc_advance_btns[] = {HSD_TRIGGER_L, HSD_TRIGGER_Z, HSD_BUTTON_X, HSD_BUTTON_Y, HSD_TRIGGER_R};
+    Memcard *memcard = R13_PTR(MEMCARD);
+    int btn_idx = memcard->TM_LabFrameAdvanceButton;
+    if (btn_idx >= ARRAY_LEN(stc_advance_btns))
+        btn_idx = 0;
+    int advance_btn = stc_advance_btns[btn_idx];
+
+    // check if holding L
+    if (Ldsh_FrameAdvance.option_val == 1 && (pad->held & advance_btn))
+    {
+        timer++;
+
+        // advance if first press or holding more than 10 frames
+        if (timer == 1 || timer > 30)
+        {
+            isAdvance = 1;
+
+            // remove button input
+            pad->down &= ~advance_btn;
+            pad->held &= ~advance_btn;
+            engine_pad->down &= ~advance_btn;
+            engine_pad->held &= ~advance_btn;
+
+            // if using L, remove analog press too
+            if (advance_btn == HSD_TRIGGER_L)
+            {
+                pad->triggerLeft = 0;
+                pad->ftriggerLeft = 0;
+                engine_pad->triggerLeft = 0;
+                engine_pad->ftriggerLeft = 0;
+            }
+            else if (advance_btn == HSD_TRIGGER_R)
+            {
+                pad->triggerRight = 0;
+                pad->ftriggerRight = 0;
+                engine_pad->triggerRight = 0;
+                engine_pad->ftriggerRight = 0;
+            }
+        }
+    }
+    else
+    {
+        update->advance = 0;
+        timer = 0;
+    }
+
+    return isAdvance;
 }
 
 // Initial Menu
