@@ -1082,10 +1082,16 @@ static char *LabValues_InfoDisplay[INFDISP_COUNT] = {"None", "Position", "State 
 static char *LabValues_InfoSizeText[] = {"Small", "Medium", "Large"};
 static float LabValues_InfoSizes[] = {0.7, 0.85, 1.0};
 
-static char *LabValues_InfoPresets[] = {"None", "Ledge", "Damage"};
+static char *LabValues_InfoPresets[] = {"None", "State", "Ledge", "Damage"};
 static int LabValues_InfoPresetStates[][OPTINF_ROW_COUNT] = {
     // None
     { 0 },
+
+    // State
+    {
+        INFDISP_STATE,
+        INFDISP_FRAME,
+    },
 
     // Ledge
     {
