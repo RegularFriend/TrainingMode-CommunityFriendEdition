@@ -56,7 +56,7 @@ const int LOCKOUT_DURATION = 30;
 static float cpu_locked_percent = 0;
 static float hmn_locked_percent = 0;
 
-static bool was_missed_lcancel = false;
+static bool *did_player_miss_lcancel[] = {false, false};
 
 // Menu Callbacks
 
@@ -1030,9 +1030,9 @@ static int CheckOverlay(GOBJ *character, OverlayGroup overlay)
                 return false;
 
             if (data->TM.state_frame == 0) {
-                was_missed_lcancel = data->input.timer_trigger_any_ignore_hitlag >= 7;
+                did_player_miss_lcancel[data->ply] = data->input.timer_trigger_any_ignore_hitlag >= 7;
             }
-            return was_missed_lcancel;
+            return did_player_miss_lcancel[data->ply];
         }
 
         case (OVERLAY_CAN_FASTFALL):
