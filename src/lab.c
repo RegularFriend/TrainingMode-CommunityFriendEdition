@@ -56,6 +56,8 @@ const int LOCKOUT_DURATION = 30;
 static float cpu_locked_percent = 0;
 static float hmn_locked_percent = 0;
 
+static bool was_missed_lcancel = false;
+
 // Menu Callbacks
 
 void Lab_AddCustomOSD(GOBJ *menu_gobj) {
@@ -1027,8 +1029,10 @@ static int CheckOverlay(GOBJ *character, OverlayGroup overlay)
             if (state < ASID_LANDINGAIRN || ASID_LANDINGAIRLW < state)
                 return false;
 
-            int frames_from_first_possible_l = data->TM.state_frame + 7;
-            return data->input.timer_trigger_any_ignore_hitlag >= frames_from_first_possible_l;
+            if (data->TM.state_frame == 0) {
+                was_missed_lcancel = data->input.timer_trigger_any_ignore_hitlag >= 7;
+            }
+            return was_missed_lcancel;
         }
 
         case (OVERLAY_CAN_FASTFALL):
