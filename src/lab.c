@@ -56,6 +56,9 @@ const int LOCKOUT_DURATION = 30;
 static float cpu_locked_percent = 0;
 static float hmn_locked_percent = 0;
 
+// We need to know if an lcancel was hit for the overlays.
+// There is no flag in the game that stores the lcancel state,
+// so we calculate it on the first frame of landing and store it here. 
 static bool did_player_miss_lcancel[2] = {false, false};
 
 // Menu Callbacks
