@@ -56,7 +56,7 @@ const int LOCKOUT_DURATION = 30;
 static float cpu_locked_percent = 0;
 static float hmn_locked_percent = 0;
 
-static bool *did_player_miss_lcancel[] = {false, false};
+static bool did_player_miss_lcancel[2] = {false, false};
 
 // Menu Callbacks
 
