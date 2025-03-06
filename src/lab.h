@@ -862,7 +862,7 @@ enum gen_option
     OPTGEN_COUNT
 };
 
-static char *LabOptions_CamMode[] = {"Normal", "Zoom", "Fixed", "Advanced"};
+static char *LabOptions_CamMode[] = {"Normal", "Zoom", "Fixed", "Advanced", "Static"};
 static char *LabOptions_ShowInputs[] = {"Off", "HMN", "CPU", "HMN and CPU"};
 static char *LabOptions_FrameAdvButton[] = {"L", "Z", "X", "Y", "R"};
 

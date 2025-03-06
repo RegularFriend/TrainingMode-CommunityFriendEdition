@@ -467,7 +467,8 @@ void Lab_ChangeCamMode(GOBJ *menu_gobj, int value)
     {
         Match_SetFixedCamera();
     }
-    else if (value == 3)
+    // advanced or static
+    else if (value == 3 || value == 4)
     {
         Match_SetDevelopCamera();
     }
