@@ -332,6 +332,84 @@ Lockout_End:
 
 ##############################
 
+OSD_DJL:
+    li r0, OSD.FighterSpecificTech    # OSD ID
+    lwz r4, -0x77C0(r13)
+    lwz r4, 0x1F24(r4)
+    li r3, 1
+    slw r0, r3, r0
+    and. r0, r0, r4
+    beq DJL_End
+    
+    lwz r3, 0x4(playerdata)  # load fighter Internal ID
+    cmpwi r3, Peach.Int
+    bne DJL_End
+    
+    bl DJL_Data
+    .byte 0, 0, 0, 0
+    .byte 0, 0, 0, 0
+    .byte 0, 0, 0, 0
+    .align 2
+DJL_Data:
+    mflr r3
+    
+    lbz r4, 0x685(playerdata) # input.timer_jump
+    lwz r5, 0xC(playerdata) # ply
+    add r3, r3, r5
+    lbz r5, 0x0(r3) # frames since jump input
+    lbz r7, 0x6(r3) # previous frame's input.timer_jump
+    stb r4, 0x6(r3)
+    
+    # if just input a jump:
+    # input.timer_jump holds zero while jump is held, so we need to compare with
+    # the previous frame's input.timer_jump to determine when jump is first pressed.
+    cmpwi r4, 0
+    bne DJL_Increment
+    cmpwi r7, 0
+    bne DJL_Reset
+    
+# No jump, increment jump timer
+DJL_Increment:
+    cmpwi r5, 255
+    beq DJL_End
+    addi r5, r5, 1
+    stb r5, 0x0(r3)
+    b DJL_End
+
+# We just input a jump, so reset jump timer
+DJL_Reset:    
+    li r6, 0
+    stb r6, 0x0(r3)
+    
+    # ensure prev jump input was 10 frame or fewer ago
+    cmpwi r5, 10
+    bge DJL_End
+    
+DJL_Show:
+    addi r7, r5, 1 # fix off-by-one    
+    li r3, OSD.FighterSpecificTech # ID
+    lbz r4, 0xC(playerdata)        # queue
+    
+    li r5, MSGCOLOR_RED
+    cmpwi r7, 5
+    bne DJL_EndColor
+    li r5, MSGCOLOR_GREEN
+DJL_EndColor:
+
+    bl DJL_Text
+    mflr r6
+    Message_Display
+    b DJL_End
+    
+DJL_Text:
+    blrl
+    .string "Insta Double Jump\nFrame %d"
+    .align 2
+    
+DJL_End:
+
+##############################
+
 Exit:
     restoreall
     lwz r12, 0x219C(r31)
