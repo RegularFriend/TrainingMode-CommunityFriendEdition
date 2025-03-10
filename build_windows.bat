@@ -71,6 +71,10 @@ echo build powershield event
 "MexTK/MexTK.exe" -ff -i "src/powershield.c" -b "build" -s evFunction -dat "build/powershield.dat" -t "MexTK/evFunction.txt" -q -ow -l "MexTK/melee.link" -op 2 || ( echo ERROR: Failed to compile 'powershield.c' & goto cleanup)
 "MexTK/MexTK.exe" -trim "build/powershield.dat" || ( echo ERROR: Dat file trimming failed & goto cleanup )
 
+echo build armada_shine event
+"MexTK/MexTK.exe" -ff -i "src/armada_shine.c" -b "build" -s evFunction -dat "build/armada_shine.dat" -t "MexTK/evFunction.txt" -q -ow -l "MexTK/melee.link" -op 2 || ( echo ERROR: Failed to compile 'powershield.c' & goto cleanup)
+"MexTK/MexTK.exe" -trim "build/armada_shine.dat" || ( echo ERROR: Dat file trimming failed & goto cleanup )
+
 echo BUILD ASM FILES --------------------------------------------------------
 
 del "Additional ISO Files\codes.gct"
@@ -114,6 +118,7 @@ gc_fst fs TM-CE.iso ^
 	insert TM\ledgedash.dat build\ledgedash.dat ^
 	insert TM\wavedash.dat build\wavedash.dat ^
 	insert TM\powershield.dat build\powershield.dat ^
+	insert TM\armada_shine.dat build\armada_shine.dat ^
 	insert codes.gct build\codes.gct ^
 	insert Start.dol build\Start.dol ^
 	insert opening.bnr build\opening.bnr
