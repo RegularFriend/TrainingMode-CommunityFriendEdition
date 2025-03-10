@@ -38,4 +38,4 @@ root/
 
 # Mac files
 .DS_Store
-/cmake-build-debug/*
+/cmake-build-minimal/*
